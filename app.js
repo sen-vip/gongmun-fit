@@ -372,3 +372,23 @@ addAttach(2);
 renderBodyItems();
 autoResize(document.getElementById('mainSentence'));
 generateDocument();
+
+// v1.7.4: sticky bar shadow + quick scroll-to-top buttons
+function scrollToPageTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+const topBar = document.getElementById('topBar');
+const topBarBtn = document.getElementById('topBarBtn');
+const floatingTopBtn = document.getElementById('floatingTopBtn');
+
+function updateTopButtons() {
+  const scrolled = window.scrollY > 80;
+  if (topBar) topBar.classList.toggle('is-scrolled', scrolled);
+  if (floatingTopBtn) floatingTopBtn.classList.toggle('is-visible', scrolled);
+}
+
+if (topBarBtn) topBarBtn.addEventListener('click', scrollToPageTop);
+if (floatingTopBtn) floatingTopBtn.addEventListener('click', scrollToPageTop);
+window.addEventListener('scroll', updateTopButtons, { passive: true });
+updateTopButtons();
