@@ -112,7 +112,7 @@ OO과-0000(2020.00.00)
 ## 📁 저장소 이름
 
 ```text
-autonumber
+gongmun-fit
 ```
 
 ---
