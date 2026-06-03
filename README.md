@@ -6,7 +6,7 @@
 
 바로가기
 
-👉 공문핏 바로가기
+👉 공문핏 바로가기 https://sen-vip.github.io/gongmun-fit/
 
 ---
 
