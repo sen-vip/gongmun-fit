@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>공문핏 - 공문 구조 정리 도구</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <div>
+        <div class="eyebrow topbar">
+          <span>공문 구조 정리 도구 · v1.7.1 · senvip</span>
+          <a class="github-link" href="https://github.com/sen-vip/autonumber" target="_blank" rel="noopener noreferrer" aria-label="공문핏 GitHub 저장소 열기">GitHub</a>
+        </div>
+        <h1>📝 공문핏</h1>
+        <p class="tagline">공문 번호를 알아서 가지런히</p>
+        <p class="desc">비워둔 항목은 건너뛰고, 필요한 내용만 공문 형식에 맞게 정리합니다.</p>
+      </div>
+      <div class="badge">외부 전송 없음</div>
+    </header>
+
+    <section class="panel title-panel">
+      <div class="title-row">
+        <div class="title-input-wrap">
+          <div class="label-line">
+            <label for="docTitle">공문 제목</label>
+            <p class="hint">공문 제목은 TXT 저장 파일명에 사용됩니다.</p>
+          </div>
+          <input id="docTitle" class="input" type="text" value="2000학년도 OO 실시" placeholder="예: 2026학년도 체험학습 실시" />
+        </div>
+        <button id="generateBtn" class="primary-btn generate-top-btn" type="button">공문 생성하기</button>
+      </div>
+    </section>
+
+    <div class="workbench">
+      <div class="input-column">
+        <section class="panel paper-panel" aria-label="공문 입력 영역">
+          <div class="paper-section related-section">
+            <div class="paper-line-head">
+              <div class="head-text">
+                <h2>1. 관련</h2>
+                <p class="hint">기본 1칸입니다. 관련이 없으면 비워두세요.</p>
+              </div>
+              <button id="addRelatedBtn" class="soft-btn inline-btn" type="button">+ 관련 1칸 추가</button>
+            </div>
+            <div id="relatedList" class="stack indent-one"></div>
+          </div>
+
+          <div class="paper-section main-section">
+            <div class="paper-line-head simple-head">
+              <div class="head-text">
+                <h2>2. 본문</h2>
+                <p class="hint">이 문장은 필수로 출력됩니다.</p>
+              </div>
+            </div>
+            <div class="indent-one">
+              <textarea id="mainSentence" class="textarea autosize sentence-textarea" rows="1">2000학년도 OO을 다음과 같이 OO하고자 합니다.</textarea>
+            </div>
+
+            <div class="body-section nested-block">
+              <div id="bodyItems" class="item-list body-item-list"></div>
+            </div>
+          </div>
+
+          <div class="paper-section attach-section">
+            <div class="attach-layout">
+              <div class="paper-subtitle attach-title">붙임</div>
+              <div class="attach-content">
+                <div class="attach-guide">
+                  <p class="hint">기본 2칸입니다. 붙임이 없으면 마지막 본문에 끝.이 붙습니다.</p>
+                </div>
+                <div class="attach-editor">
+                  <div id="attachList" class="attach-list"></div>
+                  <div class="attach-side-actions">
+                    <button id="addAttachBtn" class="soft-btn attach-add-btn" type="button">+ 붙임 2칸 추가</button>
+                    <button id="resetBtn" class="reset-btn" type="button">입력 초기화</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="preview-column">
+        <section class="panel result-panel">
+          <div class="section-head result-head">
+            <div>
+              <h2>결과 미리보기</h2>
+              <p>최종 공문 본문입니다.</p>
+            </div>
+            <div class="result-top-actions">
+              <button id="copyBtn" class="secondary-btn" type="button">복사하기</button>
+              <button id="downloadBtn" class="secondary-btn" type="button">TXT 저장</button>
+            </div>
+          </div>
+          <div class="status-line"><span id="statusText" class="status">아직 생성 전</span></div>
+          <pre id="resultPreview" class="result" aria-live="polite"></pre>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
