@@ -4,39 +4,39 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>공문핏 - 공문 구조 정리 도구</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%93%9D%3C/text%3E%3C/svg%3E" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="sticky-bar" id="topBar">
     <div class="sticky-inner">
-      <div class="sticky-brand">공문 구조 정리 도구 · v1.7.1 · senvip</div>
+      <div class="sticky-brand-block">
+        <div class="sticky-title-row">
+          <span class="sticky-app-icon" aria-hidden="true">📝</span>
+          <strong class="sticky-app-name">공문핏</strong>
+          <span class="sticky-version">v1.7.1</span>
+        </div>
+        <p class="sticky-subtitle">공문 구조 정리 도구 · 외부 전송 없음</p>
+      </div>
       <div class="sticky-actions">
-        <a class="github-link" href="https://github.com/sen-vip/gongmun-fit" target="_blank" rel="noopener noreferrer" aria-label="공문핏 GitHub 저장소 열기">GitHub</a>
-        <span class="badge mini-badge">외부 전송 없음</span>
-        <button id="topBarBtn" class="topbar-up-btn" type="button" aria-label="맨 위로 이동">↑</button>
+        <button id="topBarBtn" class="topbar-up-btn" type="button" aria-label="맨 위로 이동">↑ 맨위</button>
+        <a class="github-link help-link" href="https://github.com/sen-vip/gongmun-fit" target="_blank" rel="noopener noreferrer" aria-label="공문핏 도움말 열기">도움말</a>
       </div>
     </div>
   </div>
 
   <main class="app" id="pageTop">
-    <header class="hero">
-      <div class="hero-copy">
-        <h1>📝 공문핏</h1>
-        <p class="tagline">공문 번호를 알아서 가지런히 <span class="tagline-divider">·</span> <span class="tagline-desc">비워둔 항목은 건너뛰고, 필요한 내용만 공문 형식에 맞게 정리합니다.</span></p>
-      </div>
-    </header>
 
     <section class="panel title-panel">
-      <div class="title-row">
-        <div class="title-input-wrap">
-          <div class="label-line">
-            <label for="docTitle">공문 제목</label>
-            <p class="hint">공문 제목은 TXT 저장 파일명에 사용됩니다.</p>
+      <div class="title-row title-row-inline">
+        <div class="title-input-wrap title-inline-wrap">
+          <div class="title-inline-field">
+            <label for="docTitle" class="title-inline-label">제목:</label>
+            <input id="docTitle" class="input title-inline-input" type="text" value="2000학년도 OO 실시" placeholder="예: 2026학년도 체험학습 실시" />
           </div>
-          <input id="docTitle" class="input" type="text" value="2000학년도 OO 실시" placeholder="예: 2026학년도 체험학습 실시" />
+          <p class="hint title-file-hint">공문 제목은 TXT 저장 파일명에 사용됩니다.</p>
         </div>
         <div class="title-actions title-action-stack">
-          <button id="resetBtn" class="reset-btn title-reset-btn" type="button">입력 초기화</button>
           <button id="generateBtn" class="primary-btn generate-top-btn" type="button">공문 생성하기</button>
         </div>
       </div>
@@ -82,6 +82,11 @@
                 </div>
               </div>
             </div>
+          </div>
+
+          <div class="reset-safe-zone">
+            <p class="reset-safe-note">작성 내용을 모두 지울 때만 사용하세요.</p>
+            <button id="resetBtn" class="reset-btn reset-safe-btn" type="button">전체 입력 초기화</button>
           </div>
         </section>
       </div>
