@@ -18,6 +18,7 @@ const bodyDefaults = [
   ['소요예산', '금0원'],
   ['산출근거', ''],
   ['강사', ''],
+  ['업체명', ''],
   ['기대효과', ''],
   ['협조사항', ''],
   ['행정사항', ''],
@@ -77,7 +78,7 @@ function renderBodyItems() {
     textarea.dataset.type = 'body';
     textarea.dataset.label = label;
     textarea.value = value;
-    textarea.placeholder = label;
+    textarea.placeholder = label === '업체명' ? '(주)OO' : label;
     textarea.rows = 1;
     textarea.addEventListener('input', () => autoResize(textarea));
     textarea.addEventListener('blur', () => {
