@@ -3,31 +3,33 @@ const attachList = document.getElementById('attachList');
 const bodyItems = document.getElementById('bodyItems');
 const resultPreview = document.getElementById('resultPreview');
 const statusText = document.getElementById('statusText');
+const addBodyItemBtn = document.getElementById('addBodyItemBtn');
+const bodyAddLimitText = document.getElementById('bodyAddLimitText');
 
 const DEFAULT_MAIN_SENTENCE = '2000학년도 OO을 다음과 같이 OO하고자 합니다.';
 const RELATED_SAMPLE = 'OO과-0000(2020.00.00)';
 const ATTACH_SAMPLE = 'OOO 1부.';
 
-const bodyDefaults = [
-  ['목적', ''],
-  ['일시', '2000. 00. 00.(O) 00:00~00:00'],
-  ['장소', ''],
-  ['대상', ''],
-  ['내용', ''],
-  ['운영방법', ''],
-  ['소요예산', '금0원'],
-  ['산출근거', ''],
-  ['업체명', ''],
-  ['강사', ''],
-  ['기대효과', ''],
-  ['협조사항', ''],
-  ['행정사항', ''],
-  ['기타', '']
+const itemMarkers = [
+  '가','나','다','라','마','바','사','아','자','차','카','타','파','하',
+  '거','너','더','러','머','버','서','어','저','처','커','터','퍼','허',
+  '고','노','도','로','모','보','소','오','조','초','코','토','포','호'
 ];
 
-const hangulNums = ['가','나','다','라','마','바','사','아','자','차','카','타','파','하'];
+const bodyDefaults = [
+  { label: '일시', value: '2000. 00. 00.(O) 00:00~00:00' },
+  { label: '장소', value: '' },
+  { label: '대상', value: '' },
+  { label: '내용', value: '' },
+  { label: '금액(소요예산)', value: '금0원' },
+  { label: '산출근거', value: '' },
+  { label: '업체명', value: '(주)OO' },
+  { label: '', value: '', custom: true }
+];
+
 let relatedCount = 0;
 let attachCount = 0;
+let visibleBodyCount = bodyDefaults.length;
 
 function createRelatedBox(index, value = RELATED_SAMPLE) {
   const input = document.createElement('input');
@@ -65,36 +67,90 @@ function addAttach(n = 2) {
   }
 }
 
-function renderBodyItems() {
-  bodyDefaults.forEach(([label, value], idx) => {
-    const wrap = document.createElement('div');
-    wrap.className = 'field';
+function getBodyConfig(index) {
+  if (index < bodyDefaults.length) return bodyDefaults[index];
+  return { label: '', value: '', custom: true };
+}
 
+function createBodyItem(index) {
+  const config = getBodyConfig(index);
+  const marker = itemMarkers[index];
+  const wrap = document.createElement('div');
+  wrap.className = config.custom ? 'field custom-field' : 'field';
+  wrap.dataset.bodyIndex = String(index);
+
+  const markerEl = document.createElement('span');
+  markerEl.className = 'item-marker';
+  markerEl.textContent = `${marker}.`;
+  wrap.appendChild(markerEl);
+
+  if (config.custom) {
+    const labelInput = document.createElement('input');
+    labelInput.className = 'input body-label-input';
+    labelInput.type = 'text';
+    labelInput.dataset.type = 'bodyLabel';
+    labelInput.placeholder = '직접 입력';
+    labelInput.value = config.label || '';
+    wrap.appendChild(labelInput);
+  } else {
     const labelEl = document.createElement('label');
-    labelEl.textContent = `${hangulNums[idx]}. ${label}:`;
-
-    const textarea = document.createElement('textarea');
-    textarea.className = 'textarea autosize';
-    textarea.dataset.type = 'body';
-    textarea.dataset.label = label;
-    textarea.value = value;
-    textarea.placeholder = label === '업체명' ? '(주)OO' : label;
-    textarea.rows = 1;
-    textarea.addEventListener('input', () => autoResize(textarea));
-    textarea.addEventListener('blur', () => {
-      if (label === '소요예산') {
-        normalizeMoneyInput(textarea);
-      } else {
-        textarea.value = formatNumbersWithUnits(textarea.value);
-      }
-      autoResize(textarea);
-    });
-
+    labelEl.className = 'item-label';
+    labelEl.textContent = `${config.label}:`;
     wrap.appendChild(labelEl);
-    wrap.appendChild(textarea);
-    bodyItems.appendChild(wrap);
+  }
+
+  const textarea = document.createElement('textarea');
+  textarea.className = 'textarea autosize';
+  textarea.dataset.type = 'body';
+  textarea.dataset.label = config.label || '';
+  textarea.value = config.value || '';
+  textarea.placeholder = config.custom ? '내용을 입력하세요' : config.label;
+  textarea.rows = 1;
+  textarea.addEventListener('input', () => autoResize(textarea));
+  textarea.addEventListener('blur', () => {
+    const label = getBodyLabel(textarea);
+    if (isMoneyLabel(label)) {
+      normalizeMoneyInput(textarea);
+    } else {
+      textarea.value = formatNumbersWithUnits(textarea.value);
+    }
     autoResize(textarea);
   });
+
+  wrap.appendChild(textarea);
+  bodyItems.appendChild(wrap);
+  autoResize(textarea);
+}
+
+function renderBodyItems() {
+  bodyItems.innerHTML = '';
+  for (let i = 0; i < visibleBodyCount && i < itemMarkers.length; i++) {
+    createBodyItem(i);
+  }
+  updateBodyAddButton();
+}
+
+function addBodyItem() {
+  if (visibleBodyCount >= itemMarkers.length) return;
+  visibleBodyCount += 1;
+  createBodyItem(visibleBodyCount - 1);
+  updateBodyAddButton();
+  const last = bodyItems.querySelector('.field:last-child');
+  const focusTarget = last?.querySelector('.body-label-input') || last?.querySelector('textarea');
+  if (focusTarget) focusTarget.focus();
+}
+
+function updateBodyAddButton() {
+  const isMax = visibleBodyCount >= itemMarkers.length;
+  if (addBodyItemBtn) addBodyItemBtn.hidden = isMax;
+  if (bodyAddLimitText) bodyAddLimitText.hidden = !isMax;
+}
+
+function getBodyLabel(textarea) {
+  const wrap = textarea.closest('.field');
+  const inputLabel = wrap?.querySelector('.body-label-input')?.value;
+  const label = normalizeText(inputLabel || textarea.dataset.label || '');
+  return label || '기타';
 }
 
 function autoResize(el) {
@@ -139,6 +195,8 @@ function isEmptyValue(value) {
   if (/^금0+원$/.test(compact)) return true;
   if (/^O+1부$/i.test(compact)) return true;
   if (/^O+1부끝$/i.test(compact)) return true;
+  if (compact === '주OO') return true;
+  if (compact === '강사') return true;
   return false;
 }
 
@@ -159,8 +217,13 @@ function normalizeMoneyInput(textarea) {
   textarea.value = `금${amount.toLocaleString('ko-KR')}원`;
 }
 
+
+function isMoneyLabel(label) {
+  return label === '소요예산' || label === '금액(소요예산)';
+}
+
 function formatMoney(label, value) {
-  if (label !== '소요예산') return value;
+  if (!isMoneyLabel(label)) return value;
   const amount = extractAmount(value);
   if (!amount || amount <= 0) return value;
   const cleaned = `금${amount.toLocaleString('ko-KR')}원`;
@@ -228,28 +291,27 @@ function generateDocument() {
   const lines = [];
   let mainNo = 1;
 
-  document.querySelectorAll('textarea[data-label="소요예산"]').forEach(normalizeMoneyInput);
   document.querySelectorAll('textarea[data-type="body"]').forEach(input => {
-    if (input.dataset.label !== '소요예산') input.value = formatNumbersWithUnits(input.value);
+    const label = getBodyLabel(input);
+    if (isMoneyLabel(label)) normalizeMoneyInput(input);
+    else input.value = formatNumbersWithUnits(input.value);
   });
   document.querySelectorAll('.autosize').forEach(autoResize);
 
   const related = getValues('input[data-type="related"]');
   const mainSentence = normalizeText(document.getElementById('mainSentence').value) || DEFAULT_MAIN_SENTENCE;
   const body = Array.from(document.querySelectorAll('textarea[data-type="body"]'))
-    .map(input => ({ label: input.dataset.label, value: cleanMultiline(input.value) }))
+    .map(input => ({ label: getBodyLabel(input), value: cleanMultiline(input.value) }))
     .filter(item => !isEmptyValue(item.value))
     .map(item => ({
       ...item,
-      value: item.label === '소요예산'
+      value: isMoneyLabel(item.label)
         ? formatMoney(item.label, item.value)
         : formatNumbersWithUnits(item.value)
     }));
   const attachments = getValues('textarea[data-type="attach"]').map(cleanAttachment).filter(Boolean);
 
   if (related.length === 0) {
-    // 관련이 없을 때는 본문 문장에 큰 번호를 붙이지 않고,
-    // 본문 항목을 1, 2, 3...으로 승격한다.
     lines.push(mainSentence);
     body.forEach((item, idx) => {
       lines.push(formatMainLine(idx + 1, item.label, item.value));
@@ -261,7 +323,7 @@ function generateDocument() {
     } else {
       lines.push(`${mainNo}. 관련`);
       related.forEach((item, idx) => {
-        lines.push(`  ${hangulNums[idx]}. ${item}`);
+        lines.push(`  ${itemMarkers[idx] || `${idx + 1})`}. ${item}`);
       });
       mainNo += 1;
     }
@@ -273,7 +335,7 @@ function generateDocument() {
       lines.push(formatMainLine(mainNo, body[0].label, body[0].value));
     } else if (body.length > 1) {
       body.forEach((item, idx) => {
-        lines.push(formatSubLine(hangulNums[idx], item.label, item.value));
+        lines.push(formatSubLine(itemMarkers[idx] || `${idx + 1})`, item.label, item.value));
       });
     }
   }
@@ -338,7 +400,6 @@ function downloadTxt() {
   statusText.textContent = 'TXT 저장 완료';
 }
 
-
 function resetForm() {
   const ok = window.confirm('작성 중인 내용을 모두 초기화할까요?');
   if (!ok) return;
@@ -351,6 +412,7 @@ function resetForm() {
   bodyItems.innerHTML = '';
   relatedCount = 0;
   attachCount = 0;
+  visibleBodyCount = bodyDefaults.length;
 
   addRelated(1);
   addAttach(2);
@@ -367,6 +429,7 @@ document.getElementById('copyBtn').addEventListener('click', copyResult);
 document.getElementById('downloadBtn').addEventListener('click', downloadTxt);
 document.getElementById('resetBtn').addEventListener('click', resetForm);
 document.getElementById('mainSentence').addEventListener('input', e => autoResize(e.target));
+if (addBodyItemBtn) addBodyItemBtn.addEventListener('click', addBodyItem);
 
 addRelated(1);
 addAttach(2);
@@ -374,7 +437,6 @@ renderBodyItems();
 autoResize(document.getElementById('mainSentence'));
 generateDocument();
 
-// v1.7.4: sticky bar shadow + quick scroll-to-top buttons
 function scrollToPageTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
