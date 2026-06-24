@@ -287,6 +287,16 @@ function formatMainLine(number, label, value) {
   return `${number}. ${label}: ${value}`;
 }
 
+
+function scrollToResultOnMobile() {
+  if (!window.matchMedia || !window.matchMedia('(max-width: 960px)').matches) return;
+  const target = document.querySelector('.result-panel');
+  if (!target) return;
+  window.requestAnimationFrame(() => {
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
 function generateDocument() {
   const lines = [];
   let mainNo = 1;
@@ -360,6 +370,7 @@ function generateDocument() {
   const result = lines.join('\n');
   resultPreview.textContent = result;
   statusText.textContent = '생성 완료';
+  scrollToResultOnMobile();
   return result;
 }
 
