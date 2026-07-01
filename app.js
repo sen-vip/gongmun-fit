@@ -8,7 +8,7 @@ const bodyAddLimitText = document.getElementById('bodyAddLimitText');
 
 const DEFAULT_MAIN_SENTENCE = '2000학년도 OO을 다음과 같이 OO하고자 합니다.';
 const RELATED_SAMPLE = 'OO과-0000(2020.00.00)';
-const ATTACH_SAMPLE = 'OOO 1부.';
+const ATTACH_SAMPLE_VALUES = ['계획(안)', '견적서'];
 
 const itemMarkers = [
   '가','나','다','라','마','바','사','아','자','차','카','타','파','하',
@@ -41,15 +41,25 @@ function createRelatedBox(index, value = RELATED_SAMPLE) {
   relatedList.appendChild(input);
 }
 
-function createAttachBox(index, value = ATTACH_SAMPLE) {
+function createAttachBox(index, value = '') {
+  const row = document.createElement('div');
+  row.className = 'attach-row';
+
+  const marker = document.createElement('div');
+  marker.className = 'attach-marker';
+  marker.textContent = `${index}.`;
+
   const textarea = document.createElement('textarea');
   textarea.className = 'textarea autosize';
   textarea.dataset.type = 'attach';
-  textarea.placeholder = `붙임 ${index}`;
+  textarea.placeholder = index === 1 ? '계획(안)' : index === 2 ? '견적서' : '붙임명 입력';
   textarea.rows = 1;
   textarea.value = value;
   textarea.addEventListener('input', () => autoResize(textarea));
-  attachList.appendChild(textarea);
+
+  row.appendChild(marker);
+  row.appendChild(textarea);
+  attachList.appendChild(row);
   autoResize(textarea);
 }
 
@@ -63,7 +73,8 @@ function addRelated(n = 1) {
 function addAttach(n = 2) {
   for (let i = 0; i < n; i++) {
     attachCount += 1;
-    createAttachBox(attachCount, ATTACH_SAMPLE);
+    const sample = ATTACH_SAMPLE_VALUES[attachCount - 1] || '';
+    createAttachBox(attachCount, sample);
   }
 }
 
@@ -201,10 +212,24 @@ function isEmptyValue(value) {
 }
 
 function cleanAttachment(value) {
-  let text = normalizeText(value);
-  text = text.replace(/^\d+\s*[.)]\s*/, '').trim();
-  if (text && !/[.]$/.test(text)) text += '.';
-  return text;
+  return normalizeText(value)
+    .replace(/^\d+\s*[.)]\s*/, '')
+    .replace(/\s*끝\.?\s*$/g, '')
+    .trim();
+}
+
+function formatAttachment(value) {
+  let text = cleanAttachment(value);
+  if (!text) return '';
+
+  // 이미 '1부', '2부'처럼 부수가 있으면 마침표만 정리한다.
+  if (/\d+\s*부\.?$/.test(text)) {
+    return text.replace(/\.?$/, '.');
+  }
+
+  // 붙임명만 입력했거나 끝에 마침표만 입력한 경우 '1부.'를 자동으로 붙인다.
+  text = text.replace(/[.]$/, '').trim();
+  return `${text} 1부.`;
 }
 
 function normalizeMoneyInput(textarea) {
@@ -319,7 +344,7 @@ function generateDocument() {
         ? formatMoney(item.label, item.value)
         : formatNumbersWithUnits(item.value)
     }));
-  const attachments = getValues('textarea[data-type="attach"]').map(cleanAttachment).filter(Boolean);
+  const attachments = getValues('textarea[data-type="attach"]').map(formatAttachment).filter(Boolean);
 
   if (related.length === 0) {
     lines.push(mainSentence);
