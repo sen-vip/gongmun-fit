@@ -14,7 +14,7 @@
         <div class="sticky-title-row">
           <span class="sticky-app-icon" aria-hidden="true">📝</span>
           <strong class="sticky-app-name">공문핏</strong>
-          <span class="sticky-version">v1.7.13</span>
+          <span class="sticky-version">v1.7.15</span>
         </div>
         <p class="sticky-subtitle">공문 구조 정리 도구 · 외부 전송 없음</p>
       </div>
@@ -95,7 +95,7 @@
       </div>
 
       <aside class="preview-column">
-        <section class="panel result-panel">
+        <section class="panel result-panel is-empty">
           <div class="section-head result-head">
             <div>
               <h2>결과 미리보기</h2>
@@ -106,7 +106,12 @@
               <button id="downloadBtn" class="secondary-btn" type="button">TXT 저장</button>
             </div>
           </div>
-          <div class="status-line"><span id="statusText" class="status">아직 생성 전</span></div>
+          <div class="status-line"><span id="statusText" class="status">생성 전</span></div>
+          <div id="emptyPreview" class="empty-preview" aria-live="polite">
+            <div class="empty-preview-icon" aria-hidden="true">📄</div>
+            <strong class="empty-preview-title">아직 결과가 없어요</strong>
+            <p class="empty-preview-desc">항목을 입력하고 공문 생성하기를 눌러보세요</p>
+          </div>
           <pre id="resultPreview" class="result" aria-live="polite"></pre>
         </section>
       </aside>
@@ -114,6 +119,7 @@
   </main>
 
   <button id="floatingTopBtn" class="floating-top-btn" type="button" aria-label="맨 위로 이동">↑</button>
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
   <script src="app.js"></script>
 </body>
 </html>

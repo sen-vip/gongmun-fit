@@ -5,6 +5,12 @@ const resultPreview = document.getElementById('resultPreview');
 const statusText = document.getElementById('statusText');
 const addBodyItemBtn = document.getElementById('addBodyItemBtn');
 const bodyAddLimitText = document.getElementById('bodyAddLimitText');
+const resultPanel = document.querySelector('.result-panel');
+const emptyPreview = document.getElementById('emptyPreview');
+const toast = document.getElementById('toast');
+
+let hasGeneratedResult = false;
+let toastTimer = null;
 
 const DEFAULT_MAIN_SENTENCE = '2000학년도 OO을 다음과 같이 OO하고자 합니다.';
 const RELATED_SAMPLE = 'OO과-0000(2020.00.00)';
@@ -85,6 +91,7 @@ function getBodyConfig(index) {
 
 function createBodyItem(index) {
   const config = getBodyConfig(index);
+  let labelInput = null;
   const marker = itemMarkers[index];
   const wrap = document.createElement('div');
   wrap.className = config.custom ? 'field custom-field' : 'field';
@@ -96,7 +103,7 @@ function createBodyItem(index) {
   wrap.appendChild(markerEl);
 
   if (config.custom) {
-    const labelInput = document.createElement('input');
+    labelInput = document.createElement('input');
     labelInput.className = 'input body-label-input';
     labelInput.type = 'text';
     labelInput.dataset.type = 'bodyLabel';
@@ -117,7 +124,10 @@ function createBodyItem(index) {
   textarea.value = config.value || '';
   textarea.placeholder = config.custom ? '내용을 입력하세요' : config.label;
   textarea.rows = 1;
-  textarea.addEventListener('input', () => autoResize(textarea));
+  textarea.addEventListener('input', () => {
+    autoResize(textarea);
+    updateMoneyPreview(textarea);
+  });
   textarea.addEventListener('blur', () => {
     const label = getBodyLabel(textarea);
     if (isMoneyLabel(label)) {
@@ -126,11 +136,24 @@ function createBodyItem(index) {
       textarea.value = formatNumbersWithUnits(textarea.value);
     }
     autoResize(textarea);
+    updateMoneyPreview(textarea);
   });
 
   wrap.appendChild(textarea);
+
+  const moneyPreview = document.createElement('div');
+  moneyPreview.className = 'money-preview-badge';
+  moneyPreview.setAttribute('aria-live', 'polite');
+  moneyPreview.hidden = true;
+  wrap.appendChild(moneyPreview);
+
+  if (labelInput) {
+    labelInput.addEventListener('input', () => updateMoneyPreview(textarea));
+  }
+
   bodyItems.appendChild(wrap);
   autoResize(textarea);
+  updateMoneyPreview(textarea);
 }
 
 function renderBodyItems() {
@@ -244,15 +267,41 @@ function normalizeMoneyInput(textarea) {
 
 
 function isMoneyLabel(label) {
-  return label === '소요예산' || label === '금액(소요예산)';
+  const compact = normalizeText(label).replace(/\s/g, '');
+  return compact === '소요예산' || compact === '금액(소요예산)' || compact.includes('소요예산');
 }
 
 function formatMoney(label, value) {
   if (!isMoneyLabel(label)) return value;
   const amount = extractAmount(value);
   if (!amount || amount <= 0) return value;
-  const cleaned = `금${amount.toLocaleString('ko-KR')}원`;
-  return `${cleaned}(${numberToKoreanMoney(amount)})`;
+  return formatMoneyDisplay(amount);
+}
+
+function formatMoneyDisplay(amount) {
+  return `금${amount.toLocaleString('ko-KR')}원(${numberToKoreanMoney(amount)})`;
+}
+
+function updateMoneyPreview(textarea) {
+  const wrap = textarea.closest('.field');
+  const badge = wrap?.querySelector('.money-preview-badge');
+  if (!badge) return;
+
+  const label = getBodyLabel(textarea);
+  const amount = extractAmount(textarea.value);
+  if (isMoneyLabel(label) && amount > 0) {
+    badge.textContent = formatMoneyDisplay(amount);
+    badge.hidden = false;
+    wrap.classList.add('has-money-preview');
+  } else {
+    badge.textContent = '';
+    badge.hidden = true;
+    wrap.classList.remove('has-money-preview');
+  }
+}
+
+function updateAllMoneyPreviews() {
+  document.querySelectorAll('textarea[data-type="body"]').forEach(updateMoneyPreview);
 }
 
 function extractAmount(value) {
@@ -312,6 +361,46 @@ function formatMainLine(number, label, value) {
   return `${number}. ${label}: ${value}`;
 }
 
+
+function setEmptyPreview(title = '아직 결과가 없어요', description = '항목을 입력하고 공문 생성하기를 눌러보세요') {
+  hasGeneratedResult = false;
+  resultPreview.textContent = '';
+  if (resultPanel) resultPanel.classList.add('is-empty');
+  if (emptyPreview) {
+    const titleEl = emptyPreview.querySelector('.empty-preview-title');
+    const descEl = emptyPreview.querySelector('.empty-preview-desc');
+    if (titleEl) titleEl.textContent = title;
+    if (descEl) descEl.textContent = description;
+  }
+  setStatus('생성 전');
+}
+
+function showResultPreview(text) {
+  hasGeneratedResult = true;
+  resultPreview.textContent = text;
+  if (resultPanel) resultPanel.classList.remove('is-empty');
+}
+
+function setStatus(message, tone = 'neutral') {
+  if (!statusText) return;
+  statusText.textContent = message;
+  statusText.classList.remove('is-success', 'is-error');
+  if (tone === 'success') statusText.classList.add('is-success');
+  if (tone === 'error') statusText.classList.add('is-error');
+}
+
+function showToast(message, tone = 'success') {
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.remove('is-success', 'is-error');
+  if (tone === 'success') toast.classList.add('is-success');
+  if (tone === 'error') toast.classList.add('is-error');
+  toast.classList.add('is-visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('is-visible');
+  }, 1800);
+}
 
 function scrollToResultOnMobile() {
   if (!window.matchMedia || !window.matchMedia('(max-width: 960px)').matches) return;
@@ -393,8 +482,9 @@ function generateDocument() {
   }
 
   const result = lines.join('\n');
-  resultPreview.textContent = result;
-  statusText.textContent = '생성 완료';
+  showResultPreview(result);
+  setStatus('생성 완료');
+  updateAllMoneyPreviews();
   scrollToResultOnMobile();
   return result;
 }
@@ -410,18 +500,24 @@ function finishLine(line) {
 }
 
 async function copyResult() {
-  const text = resultPreview.textContent || generateDocument();
+  const text = hasGeneratedResult && resultPreview.textContent.trim()
+    ? resultPreview.textContent
+    : generateDocument();
   if (!text.trim()) return;
   try {
     await navigator.clipboard.writeText(text);
-    statusText.textContent = '복사 완료';
+    setStatus('✓ 복사 완료', 'success');
+    showToast('✓ 복사됐어요', 'success');
   } catch (error) {
-    statusText.textContent = '복사 실패: 직접 선택해 복사하세요';
+    setStatus('복사 실패: 직접 선택해 복사하세요', 'error');
+    showToast('복사에 실패했어요', 'error');
   }
 }
 
 function downloadTxt() {
-  const text = resultPreview.textContent || generateDocument();
+  const text = hasGeneratedResult && resultPreview.textContent.trim()
+    ? resultPreview.textContent
+    : generateDocument();
   const title = normalizeText(document.getElementById('docTitle').value) || '2000학년도 OO 실시';
   const safeTitle = title.replace(/[\\/:*?"<>|]/g, '_');
   const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
@@ -433,7 +529,8 @@ function downloadTxt() {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
-  statusText.textContent = 'TXT 저장 완료';
+  setStatus('✓ TXT 저장 완료', 'success');
+  showToast('✓ TXT 저장됐어요', 'success');
 }
 
 function resetForm() {
@@ -454,8 +551,9 @@ function resetForm() {
   addAttach(2);
   renderBodyItems();
   document.querySelectorAll('.autosize').forEach(autoResize);
-  generateDocument();
-  statusText.textContent = '초기화 완료';
+  updateAllMoneyPreviews();
+  setEmptyPreview('초기화했어요', '항목을 입력하고 공문 생성하기를 눌러보세요');
+  setStatus('초기화 완료');
 }
 
 document.getElementById('addRelatedBtn').addEventListener('click', () => addRelated(1));
@@ -471,7 +569,8 @@ addRelated(1);
 addAttach(2);
 renderBodyItems();
 autoResize(document.getElementById('mainSentence'));
-generateDocument();
+updateAllMoneyPreviews();
+setEmptyPreview();
 
 function scrollToPageTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
