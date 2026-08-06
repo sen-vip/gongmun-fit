@@ -13,7 +13,7 @@ let hasGeneratedResult = false;
 let toastTimer = null;
 
 const DEFAULT_MAIN_SENTENCE = '2000학년도 OO을 다음과 같이 OO하고자 합니다.';
-const RELATED_SAMPLE = 'OO과-0000(2020.00.00)';
+const RELATED_SAMPLE = 'OO과-0000(2020. 00. 00.)';
 const ATTACH_SAMPLE_VALUES = ['계획(안)', '견적서'];
 
 const itemMarkers = [
