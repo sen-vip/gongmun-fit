@@ -16,6 +16,9 @@ const pasteMode = document.getElementById('pasteMode');
 const pasteInput = document.getElementById('pasteInput');
 const pasteResetBtn = document.getElementById('pasteResetBtn');
 const resultDescription = document.getElementById('resultDescription');
+const sourceTitle = document.getElementById('sourceTitle');
+const sourceDescription = document.getElementById('sourceDescription');
+const actionHelp = document.getElementById('actionHelp');
 
 let hasGeneratedResult = false;
 let toastTimer = null;
@@ -631,9 +634,12 @@ function switchMode(mode) {
   pasteModeBtn.classList.toggle('is-active', !isCompose);
   composeModeBtn.setAttribute('aria-selected', String(isCompose));
   pasteModeBtn.setAttribute('aria-selected', String(!isCompose));
-  generateBtn.textContent = isCompose ? '공문 생성하기' : '순번 정리하기';
+  generateBtn.textContent = isCompose ? '✨ 공문 생성하기' : '✨ 순번 정리하기';
+  if (sourceTitle) sourceTitle.textContent = isCompose ? '새 공문 작성' : '공문 원문';
+  if (sourceDescription) sourceDescription.textContent = isCompose ? '항목을 칸칸이 입력하면 빈 항목을 제외하고 순번을 자동으로 붙입니다.' : '이미 작성한 공문을 그대로 붙여넣으세요. 순번만 다시 맞춰드립니다.';
+  if (actionHelp) actionHelp.textContent = isCompose ? '입력한 항목을 모아 공문 형태로 생성합니다.' : '1·2·3 / 가·나·다 / 붙임 번호를 한 번에 정리합니다.';
   if (resultDescription) {
-    resultDescription.textContent = isCompose ? '생성된 공문을 이 칸에서 바로 수정할 수 있습니다. 복사·TXT 저장에는 수정한 내용이 반영됩니다.' : '순번을 정리한 뒤 이 칸에서 바로 수정할 수 있습니다. 복사·TXT 저장에는 수정한 내용이 반영됩니다.';
+    resultDescription.textContent = isCompose ? '생성된 공문을 직접 수정한 뒤 복사하거나 저장하세요.' : '정리된 결과를 직접 수정한 뒤 복사하거나 저장하세요.';
   }
 
   if (isCompose) {

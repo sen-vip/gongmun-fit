@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>공문핏 - 공문 구조 정리 도구</title>
+  <title>공문핏 - 공문 순번 정리 도구</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%93%9D%3C/text%3E%3C/svg%3E" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -14,9 +14,9 @@
         <div class="sticky-title-row">
           <span class="sticky-app-icon" aria-hidden="true">📝</span>
           <strong class="sticky-app-name">공문핏</strong>
-          <span class="sticky-version">v1.8.4</span>
+          <span class="sticky-version">v1.9.0</span>
         </div>
-        <p class="sticky-subtitle">공문 구조 정리 도구 · 외부 전송 없음</p>
+        <p class="sticky-subtitle">공문 순번 정리 도구 · 외부 전송 없음</p>
       </div>
       <div class="sticky-actions">
         <button id="topBarBtn" class="topbar-up-btn" type="button" aria-label="맨 위로 이동">↑ 맨위</button>
@@ -26,126 +26,136 @@
   </div>
 
   <main class="app" id="pageTop">
-    <section class="panel title-panel">
-      <div class="title-row title-row-inline">
-        <div class="title-input-wrap title-inline-wrap">
-          <div class="title-inline-field">
-            <label for="docTitle" class="title-inline-label">제목:</label>
-            <input id="docTitle" class="input title-inline-input" type="text" value="2000학년도 OO 실시" placeholder="예: 2026학년도 체험학습 실시" />
-          </div>
-          <p class="hint title-file-hint">공문 제목은 TXT 저장 파일명에 사용됩니다.</p>
-        </div>
-        <div class="title-actions title-action-stack">
-          <button id="generateBtn" class="primary-btn generate-top-btn" type="button">순번 정리하기</button>
-        </div>
+    <section class="panel title-panel" aria-label="저장 파일명 설정">
+      <div class="title-inline-field">
+        <label for="docTitle" class="title-inline-label">제목</label>
+        <input id="docTitle" class="input title-inline-input" type="text" value="2000학년도 OO 실시" placeholder="예: 2026학년도 체험학습 실시" />
+        <span class="title-file-hint">TXT 저장 파일명</span>
       </div>
     </section>
 
     <div class="workbench">
       <div class="input-column">
-        <div class="mode-selector" aria-label="입력 방식 선택">
-          <div class="mode-selector-label">작성 방법 선택</div>
-          <div class="mode-switch" role="tablist" aria-label="입력 방식 선택">
+        <section class="panel source-panel" aria-label="원문 입력 영역">
+          <div class="source-head">
+            <div class="source-head-copy">
+              <span class="document-kicker">원문</span>
+              <h2 id="sourceTitle">공문 원문</h2>
+              <p id="sourceDescription">이미 작성한 공문을 그대로 붙여넣으세요. 순번만 다시 맞춰드립니다.</p>
+            </div>
+            <span class="local-badge">외부 전송 없음</span>
+          </div>
+
+          <div class="mode-switch" role="tablist" aria-label="작성 방법 선택">
             <button id="pasteModeBtn" class="mode-btn is-active" type="button" role="tab" aria-selected="true" aria-controls="pasteMode">
-              <span class="mode-btn-title">📋 통째로 붙여넣기</span>
-              <span class="mode-btn-desc">1·2·3 / 가·나·다 순번을 자동으로 정리해요</span>
+              <span aria-hidden="true">📋</span><span>통째로 붙여넣기</span>
             </button>
             <button id="composeModeBtn" class="mode-btn" type="button" role="tab" aria-selected="false" aria-controls="composeMode">
-              <span class="mode-btn-title">✍️ 직접 작성</span>
-              <span class="mode-btn-desc">칸칸이 입력해서 새 공문을 만들어요</span>
+              <span aria-hidden="true">✍️</span><span>직접 작성</span>
             </button>
           </div>
-        </div>
 
-        <section id="composeMode" class="panel paper-panel mode-panel" aria-label="공문 입력 영역" hidden>
-          <div class="paper-section related-section">
-            <div class="paper-line-head">
-              <div class="head-text">
-                <h2>1.  관련</h2>
-                <p class="hint">기본 1칸입니다. 관련이 없으면 비워두세요.</p>
-              </div>
-              <button id="addRelatedBtn" class="soft-btn inline-btn" type="button">+ 관련 1칸 추가</button>
+          <section id="pasteMode" class="mode-panel source-mode-pane" aria-label="붙여넣기 순번 정리 영역">
+            <div class="paper-caption">
+              <strong>공문을 그대로 붙여넣으세요</strong>
+              <span>본문 숫자 · 가나다 · 붙임 번호를 문맥별로 각각 정리합니다.</span>
             </div>
-            <div id="relatedList" class="stack indent-one"></div>
-          </div>
+            <textarea id="pasteInput" class="textarea paste-textarea document-input" rows="18" spellcheck="false" placeholder="1.관련: 학돌중학교-1234(2026. 8. 5.)&#10;3. 2026학년도 교직원 안전교육을 다음과 같이 실시하고자 합니다.&#10;  가. 일시: 2026. 8. 20.(목) 15:00&#10;  나. 장소: 시청각실&#10;  나. 대상: 전 교직원&#10;  라. 내용: 생활안전 및 응급상황 대응 교육&#10;4. 행정사항: 전 교직원은 교육에 참석하여 주시기 바랍니다.&#10;&#10;붙임 1. 교직원 안전교육 계획(안) 1부.&#10;    22. 교육자료 1부. 끝."></textarea>
+            <div class="mode-sub-actions">
+              <button id="pasteResetBtn" class="reset-btn reset-safe-btn" type="button">붙여넣기 내용 지우기</button>
+            </div>
+          </section>
 
-          <div class="paper-section main-section">
-            <div class="sentence-line">
-              <div class="sentence-number">2.</div>
-              <textarea id="mainSentence" class="textarea autosize sentence-textarea" rows="1">2000학년도 OO을 다음과 같이 OO하고자 합니다.</textarea>
+          <section id="composeMode" class="mode-panel source-mode-pane compose-pane" aria-label="공문 직접 작성 영역" hidden>
+            <div class="paper-caption">
+              <strong>항목을 칸칸이 작성하세요</strong>
+              <span>빈 항목은 제외하고 필요한 순번만 자동으로 붙습니다.</span>
             </div>
-            <div class="body-section nested-block">
-              <div id="bodyItems" class="item-list body-item-list"></div>
-              <div class="body-add-row">
-                <button id="addBodyItemBtn" class="soft-btn inline-btn body-add-btn" type="button">+ 항목 추가</button>
-                <p id="bodyAddLimitText" class="hint body-add-limit" hidden>추가 가능한 항목을 모두 열었습니다.</p>
-              </div>
-            </div>
-          </div>
 
-          <div class="paper-section attach-section">
-            <div class="attach-layout">
-              <div class="paper-subtitle attach-title">붙임</div>
-              <div class="attach-content">
-                <div class="attach-guide">
-                  <p class="hint">붙임명만 입력하세요. 출력 시 ‘1부.’가 자동으로 붙습니다.</p>
+            <div class="paper-section related-section">
+              <div class="paper-line-head">
+                <div class="head-text">
+                  <h2>1. 관련</h2>
+                  <p class="hint">기본 1칸입니다. 관련이 없으면 비워두세요.</p>
                 </div>
-                <div class="attach-editor">
-                  <div id="attachList" class="attach-list"></div>
-                  <div class="attach-side-actions">
-                    <button id="addAttachBtn" class="soft-btn attach-add-btn" type="button">+ 붙임 2칸 추가</button>
+                <button id="addRelatedBtn" class="soft-btn inline-btn" type="button">+ 관련 1칸 추가</button>
+              </div>
+              <div id="relatedList" class="stack indent-one"></div>
+            </div>
+
+            <div class="paper-section main-section">
+              <div class="sentence-line">
+                <div class="sentence-number">2.</div>
+                <textarea id="mainSentence" class="textarea autosize sentence-textarea" rows="1">2000학년도 OO을 다음과 같이 OO하고자 합니다.</textarea>
+              </div>
+              <div class="body-section nested-block">
+                <div id="bodyItems" class="item-list body-item-list"></div>
+                <div class="body-add-row">
+                  <button id="addBodyItemBtn" class="soft-btn inline-btn body-add-btn" type="button">+ 항목 추가</button>
+                  <p id="bodyAddLimitText" class="hint body-add-limit" hidden>추가 가능한 항목을 모두 열었습니다.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="paper-section attach-section">
+              <div class="attach-layout">
+                <div class="paper-subtitle attach-title">붙임</div>
+                <div class="attach-content">
+                  <div class="attach-guide">
+                    <p class="hint">붙임명만 입력하세요. 출력 시 ‘1부.’가 자동으로 붙습니다.</p>
+                  </div>
+                  <div class="attach-editor">
+                    <div id="attachList" class="attach-list"></div>
+                    <div class="attach-side-actions">
+                      <button id="addAttachBtn" class="soft-btn attach-add-btn" type="button">+ 붙임 2칸 추가</button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="reset-safe-zone">
-            <p class="reset-safe-note">작성 내용을 모두 지울 때만 사용하세요.</p>
-            <button id="resetBtn" class="reset-btn reset-safe-btn" type="button">전체 입력 초기화</button>
-          </div>
-        </section>
-
-        <section id="pasteMode" class="panel paste-panel mode-panel" aria-label="붙여넣기 순번 정리 영역">
-          <div class="paste-head">
-            <div>
-              <h2>붙여넣어 정리</h2>
-              <p>이미 작성한 공문을 그대로 붙여넣으세요. 본문의 1·2·3과 가·나·다, 붙임 번호를 문맥에 맞게 다시 정리합니다.</p>
+            <div class="reset-safe-zone">
+              <p class="reset-safe-note">작성 내용을 모두 지울 때만 사용하세요.</p>
+              <button id="resetBtn" class="reset-btn reset-safe-btn" type="button">전체 입력 초기화</button>
             </div>
-            <span class="local-badge">외부 전송 없음</span>
+          </section>
+
+          <div class="source-action-row">
+            <p id="actionHelp" class="source-action-help">1·2·3 / 가·나·다 / 붙임 번호를 한 번에 정리합니다.</p>
+            <button id="generateBtn" class="primary-btn source-primary-btn" type="button">✨ 순번 정리하기</button>
           </div>
-          <textarea id="pasteInput" class="textarea paste-textarea" rows="16" spellcheck="false" placeholder="예)&#10;1. 관련: 학돌중학교-1234(2026. 8. 5.)&#10;&#10;3) 0000학년도 교직원 안전교육을 다음과 같이 실시하고자 합니다.&#10;   가. 일시: 0000. 8. 20.(목) 15:00&#10;   나. 장소: 시청각실&#10;   나. 대상: 전 교직원&#10;   라. 내용: 생활안전 및 응급상황 대응 교육&#10;4) 행정사항: 전 교직원은 교육에 참석하여 주시기 바랍니다.&#10;&#10;&#10;붙임  1. 교직원 안전교육 계획(안) 1부.&#10;22. 교육자료 1부.  끝."></textarea>
-          <div class="paste-guide">
-            <strong>이렇게 정리해요</strong>
-            <span>본문의 `1. 2. 3.`과 하위 `가. 나. 다.`를 각각의 순서로 다시 매겨요.</span>
-            <span>`붙임  1.`부터 시작하는 붙임 번호는 본문 숫자와 섞지 않고 따로 정리해요.</span>
-            <span>일반 문장·날짜·빈 줄·내용 자체는 그대로 유지해요.</span>
-          </div>
-          <div class="paste-actions">
-            <button id="pasteResetBtn" class="reset-btn reset-safe-btn" type="button">붙여넣기 내용 지우기</button>
+
+          <div class="paste-guide compact-guide" aria-label="순번 정리 안내">
+            <span><strong>정리 기준</strong> 본문 숫자와 하위 가나다를 각각 다시 매깁니다.</span>
+            <span>‘붙임 1.’부터 시작하는 붙임 번호는 본문과 섞지 않고 따로 정리합니다.</span>
+            <span>일반 문장·날짜·빈 줄·내용 자체는 그대로 유지합니다.</span>
           </div>
         </section>
       </div>
 
       <aside class="preview-column">
-        <section class="panel result-panel is-empty">
+        <section class="panel result-panel is-empty" aria-label="정리된 공문 영역">
           <div class="section-head result-head">
             <div>
-              <h2>결과 확인·수정</h2>
-              <p id="resultDescription">순번을 정리한 뒤 이 칸에서 바로 수정할 수 있습니다. 복사·TXT 저장에는 수정한 내용이 반영됩니다.</p>
+              <span class="document-kicker">정리된 공문</span>
+              <h2>결과 확인 · 수정</h2>
+              <p id="resultDescription">정리된 결과를 직접 수정한 뒤 복사하거나 저장하세요.</p>
             </div>
             <div class="result-top-actions">
               <button id="copyBtn" class="secondary-btn" type="button">복사하기</button>
               <button id="downloadBtn" class="secondary-btn" type="button">TXT 저장</button>
             </div>
           </div>
-          <div class="status-line"><span id="statusText" class="status">생성 전</span></div>
-          <div id="emptyPreview" class="empty-preview" aria-live="polite">
-            <div class="empty-preview-icon" aria-hidden="true">📄</div>
-            <strong class="empty-preview-title">아직 결과가 없어요</strong>
-            <p class="empty-preview-desc">항목을 입력하고 공문 생성하기를 눌러보세요</p>
+          <div class="status-line"><span id="statusText" class="status">정리 전</span></div>
+          <div class="document-sheet result-sheet">
+            <div id="emptyPreview" class="empty-preview" aria-live="polite">
+              <div class="empty-preview-icon" aria-hidden="true">📄</div>
+              <strong class="empty-preview-title">아직 정리한 결과가 없어요</strong>
+              <p class="empty-preview-desc">왼쪽에 공문을 붙여넣고 순번 정리하기를 눌러보세요</p>
+            </div>
+            <textarea id="resultPreview" class="result result-editor" rows="18" spellcheck="false" aria-label="정리 결과 편집" aria-live="polite"></textarea>
           </div>
-          <textarea id="resultPreview" class="result result-editor" rows="18" spellcheck="false" aria-label="정리 결과 편집" aria-live="polite"></textarea>
+          <p class="result-edit-note">✎ 정리된 문장은 이곳에서 바로 수정할 수 있습니다. 수정 내용은 복사·TXT 저장에 그대로 반영됩니다.</p>
         </section>
       </aside>
     </div>
