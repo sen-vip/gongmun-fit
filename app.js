@@ -19,7 +19,7 @@ const resultDescription = document.getElementById('resultDescription');
 
 let hasGeneratedResult = false;
 let toastTimer = null;
-let activeMode = 'compose';
+let activeMode = 'paste';
 
 const DEFAULT_MAIN_SENTENCE = '2000학년도 OO을 다음과 같이 OO하고자 합니다.';
 const RELATED_SAMPLE = 'OO과-0000(2020. 00. 00.)';
@@ -717,7 +717,7 @@ addAttach(2);
 renderBodyItems();
 autoResize(document.getElementById('mainSentence'));
 updateAllMoneyPreviews();
-setEmptyPreview();
+switchMode('paste');
 
 function scrollToPageTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' });

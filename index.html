@@ -36,7 +36,7 @@
           <p class="hint title-file-hint">공문 제목은 TXT 저장 파일명에 사용됩니다.</p>
         </div>
         <div class="title-actions title-action-stack">
-          <button id="generateBtn" class="primary-btn generate-top-btn" type="button">공문 생성하기</button>
+          <button id="generateBtn" class="primary-btn generate-top-btn" type="button">순번 정리하기</button>
         </div>
       </div>
     </section>
@@ -46,18 +46,18 @@
         <div class="mode-selector" aria-label="입력 방식 선택">
           <div class="mode-selector-label">작성 방법 선택</div>
           <div class="mode-switch" role="tablist" aria-label="입력 방식 선택">
-            <button id="composeModeBtn" class="mode-btn is-active" type="button" role="tab" aria-selected="true" aria-controls="composeMode">
-              <span class="mode-btn-title">✍️ 직접 작성</span>
-              <span class="mode-btn-desc">칸칸이 입력하면 공문핏이 순서를 맞춰요</span>
-            </button>
-            <button id="pasteModeBtn" class="mode-btn" type="button" role="tab" aria-selected="false" aria-controls="pasteMode">
+            <button id="pasteModeBtn" class="mode-btn is-active" type="button" role="tab" aria-selected="true" aria-controls="pasteMode">
               <span class="mode-btn-title">📋 통째로 붙여넣기</span>
               <span class="mode-btn-desc">1·2·3 / 가·나·다 순번을 자동으로 정리해요</span>
+            </button>
+            <button id="composeModeBtn" class="mode-btn" type="button" role="tab" aria-selected="false" aria-controls="composeMode">
+              <span class="mode-btn-title">✍️ 직접 작성</span>
+              <span class="mode-btn-desc">칸칸이 입력해서 새 공문을 만들어요</span>
             </button>
           </div>
         </div>
 
-        <section id="composeMode" class="panel paper-panel mode-panel" aria-label="공문 입력 영역">
+        <section id="composeMode" class="panel paper-panel mode-panel" aria-label="공문 입력 영역" hidden>
           <div class="paper-section related-section">
             <div class="paper-line-head">
               <div class="head-text">
@@ -106,7 +106,7 @@
           </div>
         </section>
 
-        <section id="pasteMode" class="panel paste-panel mode-panel" aria-label="붙여넣기 순번 정리 영역" hidden>
+        <section id="pasteMode" class="panel paste-panel mode-panel" aria-label="붙여넣기 순번 정리 영역">
           <div class="paste-head">
             <div>
               <h2>붙여넣어 정리</h2>
@@ -114,7 +114,7 @@
             </div>
             <span class="local-badge">외부 전송 없음</span>
           </div>
-          <textarea id="pasteInput" class="textarea paste-textarea" rows="16" spellcheck="false" placeholder="예)&#10;2000학년도 OO을 다음과 같이 OO하고자 합니다.&#10;&#10;1. 관련&#10;3. OO하고자 합니다.&#10;   가. 일시&#10;   다. 장소&#10;   다. 대상&#10;&#10;붙임  1. 계획(안) 1부.&#10;      3. 견적서 1부.  끝."></textarea>
+          <textarea id="pasteInput" class="textarea paste-textarea" rows="16" spellcheck="false" placeholder="예)&#10;1. 관련: 학돌중학교-1234(2026. 8. 5.)&#10;&#10;3) 0000학년도 교직원 안전교육을 다음과 같이 실시하고자 합니다.&#10;   가. 일시: 0000. 8. 20.(목) 15:00&#10;   나. 장소: 시청각실&#10;   나. 대상: 전 교직원&#10;   라. 내용: 생활안전 및 응급상황 대응 교육&#10;4) 행정사항: 전 교직원은 교육에 참석하여 주시기 바랍니다.&#10;&#10;&#10;붙임  1. 교직원 안전교육 계획(안) 1부.&#10;22. 교육자료 1부.  끝."></textarea>
           <div class="paste-guide">
             <strong>이렇게 정리해요</strong>
             <span>본문의 `1. 2. 3.`과 하위 `가. 나. 다.`를 각각의 순서로 다시 매겨요.</span>
@@ -132,7 +132,7 @@
           <div class="section-head result-head">
             <div>
               <h2>결과 미리보기</h2>
-              <p id="resultDescription">최종 공문 본문입니다.</p>
+              <p id="resultDescription">붙여넣은 내용의 1·2·3 / 가·나·다 / 붙임 순번을 다시 정리한 결과입니다.</p>
             </div>
             <div class="result-top-actions">
               <button id="copyBtn" class="secondary-btn" type="button">복사하기</button>
