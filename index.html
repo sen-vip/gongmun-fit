@@ -14,7 +14,7 @@
         <div class="sticky-title-row">
           <span class="sticky-app-icon" aria-hidden="true">📝</span>
           <strong class="sticky-app-name">공문핏</strong>
-          <span class="sticky-version">v1.8.1</span>
+          <span class="sticky-version">v1.8.4</span>
         </div>
         <p class="sticky-subtitle">공문 구조 정리 도구 · 외부 전송 없음</p>
       </div>
@@ -114,7 +114,7 @@
             </div>
             <span class="local-badge">외부 전송 없음</span>
           </div>
-          <textarea id="pasteInput" class="textarea paste-textarea" rows="16" spellcheck="false" placeholder="예)&#10;1. 관련: 학돌중학교-1234(2026. 8. 5.)&#10;&#10;3. 0000학년도 교직원 안전교육을 다음과 같이 실시하고자 합니다.&#10;   가. 일시: 0000. 8. 20.(목) 15:00&#10;   나. 장소: 시청각실&#10;   나. 대상: 전 교직원&#10;   라. 내용: 생활안전 및 응급상황 대응 교육&#10;4) 행정사항: 전 교직원은 교육에 참석하여 주시기 바랍니다.&#10;&#10;&#10;붙임  1. 교직원 안전교육 계획(안) 1부.&#10;22. 교육자료 1부.  끝."></textarea>
+          <textarea id="pasteInput" class="textarea paste-textarea" rows="16" spellcheck="false" placeholder="예)&#10;1. 관련: 학돌중학교-1234(2026. 8. 5.)&#10;&#10;3) 0000학년도 교직원 안전교육을 다음과 같이 실시하고자 합니다.&#10;   가. 일시: 0000. 8. 20.(목) 15:00&#10;   나. 장소: 시청각실&#10;   나. 대상: 전 교직원&#10;   라. 내용: 생활안전 및 응급상황 대응 교육&#10;4) 행정사항: 전 교직원은 교육에 참석하여 주시기 바랍니다.&#10;&#10;&#10;붙임  1. 교직원 안전교육 계획(안) 1부.&#10;22. 교육자료 1부.  끝."></textarea>
           <div class="paste-guide">
             <strong>이렇게 정리해요</strong>
             <span>본문의 `1. 2. 3.`과 하위 `가. 나. 다.`를 각각의 순서로 다시 매겨요.</span>
@@ -131,8 +131,8 @@
         <section class="panel result-panel is-empty">
           <div class="section-head result-head">
             <div>
-              <h2>결과 미리보기</h2>
-              <p id="resultDescription">붙여넣은 내용의 1·2·3 / 가·나·다 / 붙임 순번을 다시 정리한 결과입니다.</p>
+              <h2>결과 확인·수정</h2>
+              <p id="resultDescription">순번을 정리한 뒤 이 칸에서 바로 수정할 수 있습니다. 복사·TXT 저장에는 수정한 내용이 반영됩니다.</p>
             </div>
             <div class="result-top-actions">
               <button id="copyBtn" class="secondary-btn" type="button">복사하기</button>
@@ -145,7 +145,7 @@
             <strong class="empty-preview-title">아직 결과가 없어요</strong>
             <p class="empty-preview-desc">항목을 입력하고 공문 생성하기를 눌러보세요</p>
           </div>
-          <pre id="resultPreview" class="result" aria-live="polite"></pre>
+          <textarea id="resultPreview" class="result result-editor" rows="18" spellcheck="false" aria-label="정리 결과 편집" aria-live="polite"></textarea>
         </section>
       </aside>
     </div>

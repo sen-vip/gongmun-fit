@@ -142,3 +142,12 @@
 .mode-btn.is-active .mode-btn-desc{color:#4b6fae}
 @media screen and (max-width:720px){.mode-selector{padding:9px;border-radius:15px}.mode-switch{grid-template-columns:1fr 1fr;gap:7px}.mode-btn{min-height:70px;padding:10px 11px}.mode-btn-title{font-size:13.5px}.mode-btn-desc{font-size:11px}}
 @media screen and (max-width:480px){.mode-switch{grid-template-columns:1fr}.mode-btn{min-height:58px}.mode-btn-desc{font-size:11.3px}}
+
+
+/* v1.8.4 editable result preview */
+.result-editor{width:100%;min-height:420px;max-height:none;resize:vertical;overflow:auto;outline:none;display:block}
+.result-editor:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(37,99,235,.09);background:#fff}
+.result-editor::selection{background:#dbeafe}
+@media screen and (max-width:960px){.result-editor{min-height:300px}}
+@media screen and (max-width:720px){.result-editor{min-height:260px;font-size:16px}}
+@media print{.result-editor{height:auto!important;min-height:0!important;resize:none;overflow:visible;white-space:pre-wrap}}

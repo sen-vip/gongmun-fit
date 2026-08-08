@@ -365,9 +365,20 @@ function formatMainLine(number, label, value) {
   return `${number}. ${label}: ${value}`;
 }
 
+function getResultText() {
+  if (!resultPreview) return '';
+  return typeof resultPreview.value === 'string' ? resultPreview.value : resultPreview.textContent || '';
+}
+
+function setResultText(text) {
+  if (!resultPreview) return;
+  if (typeof resultPreview.value === 'string') resultPreview.value = text;
+  else resultPreview.textContent = text;
+}
+
 function setEmptyPreview(title = '아직 결과가 없어요', description = '항목을 입력하고 공문 생성하기를 눌러보세요') {
   hasGeneratedResult = false;
-  resultPreview.textContent = '';
+  setResultText('');
   if (resultPanel) resultPanel.classList.add('is-empty');
   if (emptyPreview) {
     const titleEl = emptyPreview.querySelector('.empty-preview-title');
@@ -380,7 +391,7 @@ function setEmptyPreview(title = '아직 결과가 없어요', description = '�
 
 function showResultPreview(text) {
   hasGeneratedResult = true;
-  resultPreview.textContent = text;
+  setResultText(text);
   if (resultPanel) resultPanel.classList.remove('is-empty');
 }
 
@@ -516,10 +527,12 @@ function renumberPastedText() {
   }
 
   const markerPattern = itemMarkers.map(escapeRegExp).join('|');
-  const koreanPattern = new RegExp(`^(\\s*)(${markerPattern})\\s*[.．)]\\s+`);
+  // 번호 뒤 공백이 없어도 '1.관련', '3)문장', '가.일시'처럼 항목으로 인식한다.
+  // 단, '1.2.'처럼 점 뒤에 숫자가 바로 이어지는 값은 문단 번호로 보지 않는다.
+  const koreanPattern = new RegExp(`^(\\s*)(${markerPattern})\\s*(?:[)]\\s*|[.．](?:\\s+|(?=[가-힣A-Za-z0-9])))`);
   // 1~99까지만 본문 번호로 봐서 '2026. 8. 20.' 같은 날짜는 건드리지 않는다.
-  const numberPattern = /^(\s*)(\d{1,2})\s*[.．)]\s+/;
-  const attachmentStartPattern = /^(\s*)(붙임\s+)(\d{1,2})\s*[.．)]\s+/;
+  const numberPattern = /^(\s*)(\d{1,2})\s*(?:[)]\s*|[.．](?:\s+|(?=[가-힣A-Za-z])))/;
+  const attachmentStartPattern = /^(\s*)(붙임\s+)(\d{1,2})\s*(?:[)]\s*|[.．](?:\s+|(?=[가-힣A-Za-z])))/;
 
   let bodyNumber = 1;
   let koreanIndex = 0;
@@ -530,6 +543,9 @@ function renumberPastedText() {
   let attachmentCount = 0;
 
   const resultLines = raw.split('\n').map(line => {
+    // '8. 20.'처럼 월·일로 시작하는 날짜형 줄은 본문 숫자 순번으로 처리하지 않는다.
+    const isShortDateLine = /^\s*\d{1,2}\s*[.．]\s*\d{1,2}\s*[.．]/.test(line);
+
     const attachmentStart = line.match(attachmentStartPattern);
     if (attachmentStart) {
       inAttachmentBlock = true;
@@ -555,7 +571,7 @@ function renumberPastedText() {
       return line;
     }
 
-    const bodyItem = line.match(numberPattern);
+    const bodyItem = isShortDateLine ? null : line.match(numberPattern);
     if (bodyItem) {
       const indent = bodyItem[1] || '';
       const content = line.slice(bodyItem[0].length);
@@ -617,7 +633,7 @@ function switchMode(mode) {
   pasteModeBtn.setAttribute('aria-selected', String(!isCompose));
   generateBtn.textContent = isCompose ? '공문 생성하기' : '순번 정리하기';
   if (resultDescription) {
-    resultDescription.textContent = isCompose ? '최종 공문 본문입니다.' : '붙여넣은 내용의 1·2·3 / 가·나·다 / 붙임 순번을 다시 정리한 결과입니다.';
+    resultDescription.textContent = isCompose ? '생성된 공문을 이 칸에서 바로 수정할 수 있습니다. 복사·TXT 저장에는 수정한 내용이 반영됩니다.' : '순번을 정리한 뒤 이 칸에서 바로 수정할 수 있습니다. 복사·TXT 저장에는 수정한 내용이 반영됩니다.';
   }
 
   if (isCompose) {
@@ -629,8 +645,9 @@ function switchMode(mode) {
 }
 
 async function copyResult() {
-  const text = hasGeneratedResult && resultPreview.textContent.trim()
-    ? resultPreview.textContent
+  const currentResult = getResultText();
+  const text = hasGeneratedResult && currentResult.trim()
+    ? currentResult
     : generateActiveMode();
   if (!text || !text.trim()) return;
 
@@ -645,8 +662,9 @@ async function copyResult() {
 }
 
 function downloadTxt() {
-  const text = hasGeneratedResult && resultPreview.textContent.trim()
-    ? resultPreview.textContent
+  const currentResult = getResultText();
+  const text = hasGeneratedResult && currentResult.trim()
+    ? currentResult
     : generateActiveMode();
   if (!text || !text.trim()) return;
 
@@ -711,6 +729,13 @@ if (addBodyItemBtn) addBodyItemBtn.addEventListener('click', addBodyItem);
 if (composeModeBtn) composeModeBtn.addEventListener('click', () => switchMode('compose'));
 if (pasteModeBtn) pasteModeBtn.addEventListener('click', () => switchMode('paste'));
 if (pasteResetBtn) pasteResetBtn.addEventListener('click', resetPasteInput);
+
+if (resultPreview) {
+  resultPreview.addEventListener('input', () => {
+    if (!hasGeneratedResult) return;
+    setStatus('직접 수정 중 · 복사/TXT에 반영');
+  });
+}
 
 addRelated(1);
 addAttach(2);
