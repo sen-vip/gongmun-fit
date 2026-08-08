@@ -8,9 +8,18 @@ const bodyAddLimitText = document.getElementById('bodyAddLimitText');
 const resultPanel = document.querySelector('.result-panel');
 const emptyPreview = document.getElementById('emptyPreview');
 const toast = document.getElementById('toast');
+const generateBtn = document.getElementById('generateBtn');
+const composeModeBtn = document.getElementById('composeModeBtn');
+const pasteModeBtn = document.getElementById('pasteModeBtn');
+const composeMode = document.getElementById('composeMode');
+const pasteMode = document.getElementById('pasteMode');
+const pasteInput = document.getElementById('pasteInput');
+const pasteResetBtn = document.getElementById('pasteResetBtn');
+const resultDescription = document.getElementById('resultDescription');
 
 let hasGeneratedResult = false;
 let toastTimer = null;
+let activeMode = 'compose';
 
 const DEFAULT_MAIN_SENTENCE = '2000학년도 OO을 다음과 같이 OO하고자 합니다.';
 const RELATED_SAMPLE = 'OO과-0000(2020. 00. 00.)';
@@ -138,7 +147,6 @@ function createBodyItem(index) {
     autoResize(textarea);
     updateMoneyPreview(textarea);
   });
-
   wrap.appendChild(textarea);
 
   const moneyPreview = document.createElement('div');
@@ -218,7 +226,7 @@ function isEmptyValue(value) {
   const raw = normalizeText(value);
   const compact = compactPlaceholder(raw);
   if (!raw) return true;
-  if (/^[O0\s.()\-/:~]+$/i.test(raw)) return true;
+  if (/^[O0\s.()\-\/:~]+$/i.test(raw)) return true;
   if (/^OO+$/i.test(compact)) return true;
   if (/^0+$/.test(compact)) return true;
   if (compact === 'OOOOOOOOO0000') return true;
@@ -245,12 +253,10 @@ function formatAttachment(value) {
   let text = cleanAttachment(value);
   if (!text) return '';
 
-  // 이미 '1부', '2부'처럼 부수가 있으면 마침표만 정리한다.
   if (/\d+\s*부\.?$/.test(text)) {
     return text.replace(/\.?$/, '.');
   }
 
-  // 붙임명만 입력했거나 끝에 마침표만 입력한 경우 '1부.'를 자동으로 붙인다.
   text = text.replace(/[.]$/, '').trim();
   return `${text} 1부.`;
 }
@@ -264,7 +270,6 @@ function normalizeMoneyInput(textarea) {
   }
   textarea.value = `금${amount.toLocaleString('ko-KR')}원`;
 }
-
 
 function isMoneyLabel(label) {
   const compact = normalizeText(label).replace(/\s/g, '');
@@ -286,7 +291,6 @@ function updateMoneyPreview(textarea) {
   const wrap = textarea.closest('.field');
   const badge = wrap?.querySelector('.money-preview-badge');
   if (!badge) return;
-
   const label = getBodyLabel(textarea);
   const amount = extractAmount(textarea.value);
   if (isMoneyLabel(label) && amount > 0) {
@@ -361,7 +365,6 @@ function formatMainLine(number, label, value) {
   return `${number}. ${label}: ${value}`;
 }
 
-
 function setEmptyPreview(title = '아직 결과가 없어요', description = '항목을 입력하고 공문 생성하기를 눌러보세요') {
   hasGeneratedResult = false;
   resultPreview.textContent = '';
@@ -372,7 +375,7 @@ function setEmptyPreview(title = '아직 결과가 없어요', description = '�
     if (titleEl) titleEl.textContent = title;
     if (descEl) descEl.textContent = description;
   }
-  setStatus('생성 전');
+  setStatus(activeMode === 'paste' ? '정리 전' : '생성 전');
 }
 
 function showResultPreview(text) {
@@ -451,7 +454,6 @@ function generateDocument() {
       });
       mainNo += 1;
     }
-
     lines.push(`${mainNo}. ${mainSentence}`);
 
     if (body.length === 1) {
@@ -499,11 +501,139 @@ function finishLine(line) {
   return `${trimmed}.  끝.`;
 }
 
+function escapeRegExp(text) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function renumberPastedText() {
+  const raw = String(pasteInput?.value || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  if (!raw.trim()) {
+    setEmptyPreview('정리할 내용이 없어요', '작성한 공문 내용을 왼쪽에 붙여넣어 주세요');
+    setStatus('입력 필요', 'error');
+    showToast('정리할 내용을 먼저 붙여넣어 주세요', 'error');
+    pasteInput?.focus();
+    return '';
+  }
+
+  const markerPattern = itemMarkers.map(escapeRegExp).join('|');
+  const koreanPattern = new RegExp(`^(\\s*)(${markerPattern})\\s*[.．)]\\s+`);
+  // 1~99까지만 본문 번호로 봐서 '2026. 8. 20.' 같은 날짜는 건드리지 않는다.
+  const numberPattern = /^(\s*)(\d{1,2})\s*[.．)]\s+/;
+  const attachmentStartPattern = /^(\s*)(붙임\s+)(\d{1,2})\s*[.．)]\s+/;
+
+  let bodyNumber = 1;
+  let koreanIndex = 0;
+  let attachmentNumber = 1;
+  let inAttachmentBlock = false;
+  let bodyNumberCount = 0;
+  let koreanCount = 0;
+  let attachmentCount = 0;
+
+  const resultLines = raw.split('\n').map(line => {
+    const attachmentStart = line.match(attachmentStartPattern);
+    if (attachmentStart) {
+      inAttachmentBlock = true;
+      const indent = attachmentStart[1] || '';
+      const prefix = attachmentStart[2] || '붙임  ';
+      const content = line.slice(attachmentStart[0].length);
+      const next = `${indent}${prefix}${attachmentNumber}. ${content}`;
+      attachmentNumber += 1;
+      attachmentCount += 1;
+      return next;
+    }
+
+    if (inAttachmentBlock) {
+      const attachmentItem = line.match(numberPattern);
+      if (attachmentItem) {
+        const indent = attachmentItem[1] || '';
+        const content = line.slice(attachmentItem[0].length);
+        const next = `${indent}${attachmentNumber}. ${content}`;
+        attachmentNumber += 1;
+        attachmentCount += 1;
+        return next;
+      }
+      return line;
+    }
+
+    const bodyItem = line.match(numberPattern);
+    if (bodyItem) {
+      const indent = bodyItem[1] || '';
+      const content = line.slice(bodyItem[0].length);
+      const next = `${indent}${bodyNumber}. ${content}`;
+      bodyNumber += 1;
+      bodyNumberCount += 1;
+      // 새 상위 숫자 문단이 시작되면 그 아래 가나다도 다시 '가.'부터 시작한다.
+      koreanIndex = 0;
+      return next;
+    }
+
+    const koreanItem = line.match(koreanPattern);
+    if (koreanItem) {
+      const indent = koreanItem[1] || '';
+      const originalMarker = koreanItem[2];
+      const content = line.slice(koreanItem[0].length);
+      const nextMarker = itemMarkers[koreanIndex] || originalMarker;
+      koreanIndex += 1;
+      koreanCount += 1;
+      return `${indent}${nextMarker}. ${content}`;
+    }
+
+    return line;
+  });
+
+  const result = resultLines.join('\n');
+  const totalCount = bodyNumberCount + koreanCount + attachmentCount;
+  showResultPreview(result);
+
+  if (totalCount > 0) {
+    const parts = [];
+    if (bodyNumberCount) parts.push(`본문 숫자 ${bodyNumberCount}`);
+    if (koreanCount) parts.push(`가나다 ${koreanCount}`);
+    if (attachmentCount) parts.push(`붙임 ${attachmentCount}`);
+    setStatus(`✓ 순번 정리 완료 · ${parts.join(' · ')}`, 'success');
+    showToast(`✓ 순번 ${totalCount}개를 정리했어요`, 'success');
+  } else {
+    setStatus('정리할 순번 없음');
+    showToast('정리할 1·2·3 / 가·나·다 항목이 없어요', 'success');
+  }
+  scrollToResultOnMobile();
+  return result;
+}
+
+function generateActiveMode() {
+  return activeMode === 'paste' ? renumberPastedText() : generateDocument();
+}
+
+function switchMode(mode) {
+  if (mode !== 'compose' && mode !== 'paste') return;
+  activeMode = mode;
+  const isCompose = mode === 'compose';
+
+  composeMode.hidden = !isCompose;
+  pasteMode.hidden = isCompose;
+  composeModeBtn.classList.toggle('is-active', isCompose);
+  pasteModeBtn.classList.toggle('is-active', !isCompose);
+  composeModeBtn.setAttribute('aria-selected', String(isCompose));
+  pasteModeBtn.setAttribute('aria-selected', String(!isCompose));
+  generateBtn.textContent = isCompose ? '공문 생성하기' : '순번 정리하기';
+  if (resultDescription) {
+    resultDescription.textContent = isCompose ? '최종 공문 본문입니다.' : '붙여넣은 내용의 1·2·3 / 가·나·다 / 붙임 순번을 다시 정리한 결과입니다.';
+  }
+
+  if (isCompose) {
+    setEmptyPreview('아직 결과가 없어요', '항목을 입력하고 공문 생성하기를 눌러보세요');
+  } else {
+    setEmptyPreview('아직 정리한 결과가 없어요', '공문을 붙여넣고 순번 정리하기를 눌러보세요');
+    window.requestAnimationFrame(() => pasteInput?.focus());
+  }
+}
+
 async function copyResult() {
   const text = hasGeneratedResult && resultPreview.textContent.trim()
     ? resultPreview.textContent
-    : generateDocument();
-  if (!text.trim()) return;
+    : generateActiveMode();
+  if (!text || !text.trim()) return;
+
   try {
     await navigator.clipboard.writeText(text);
     setStatus('✓ 복사 완료', 'success');
@@ -517,7 +647,9 @@ async function copyResult() {
 function downloadTxt() {
   const text = hasGeneratedResult && resultPreview.textContent.trim()
     ? resultPreview.textContent
-    : generateDocument();
+    : generateActiveMode();
+  if (!text || !text.trim()) return;
+
   const title = normalizeText(document.getElementById('docTitle').value) || '2000학년도 OO 실시';
   const safeTitle = title.replace(/[\\/:*?"<>|]/g, '_');
   const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
@@ -539,6 +671,7 @@ function resetForm() {
 
   document.getElementById('docTitle').value = '2000학년도 OO 실시';
   document.getElementById('mainSentence').value = DEFAULT_MAIN_SENTENCE;
+  if (pasteInput) pasteInput.value = '';
 
   relatedList.innerHTML = '';
   attachList.innerHTML = '';
@@ -546,24 +679,38 @@ function resetForm() {
   relatedCount = 0;
   attachCount = 0;
   visibleBodyCount = bodyDefaults.length;
-
   addRelated(1);
   addAttach(2);
   renderBodyItems();
   document.querySelectorAll('.autosize').forEach(autoResize);
   updateAllMoneyPreviews();
-  setEmptyPreview('초기화했어요', '항목을 입력하고 공문 생성하기를 눌러보세요');
+  setEmptyPreview('초기화했어요', activeMode === 'paste' ? '공문을 붙여넣고 순번 정리하기를 눌러보세요' : '항목을 입력하고 공문 생성하기를 눌러보세요');
   setStatus('초기화 완료');
+}
+
+function resetPasteInput() {
+  if (!pasteInput) return;
+  if (pasteInput.value.trim()) {
+    const ok = window.confirm('붙여넣은 내용을 지울까요?');
+    if (!ok) return;
+  }
+  pasteInput.value = '';
+  setEmptyPreview('붙여넣기 내용을 지웠어요', '공문을 붙여넣고 순번 정리하기를 눌러보세요');
+  setStatus('초기화 완료');
+  pasteInput.focus();
 }
 
 document.getElementById('addRelatedBtn').addEventListener('click', () => addRelated(1));
 document.getElementById('addAttachBtn').addEventListener('click', () => addAttach(2));
-document.getElementById('generateBtn').addEventListener('click', generateDocument);
+generateBtn.addEventListener('click', generateActiveMode);
 document.getElementById('copyBtn').addEventListener('click', copyResult);
 document.getElementById('downloadBtn').addEventListener('click', downloadTxt);
 document.getElementById('resetBtn').addEventListener('click', resetForm);
 document.getElementById('mainSentence').addEventListener('input', e => autoResize(e.target));
 if (addBodyItemBtn) addBodyItemBtn.addEventListener('click', addBodyItem);
+if (composeModeBtn) composeModeBtn.addEventListener('click', () => switchMode('compose'));
+if (pasteModeBtn) pasteModeBtn.addEventListener('click', () => switchMode('paste'));
+if (pasteResetBtn) pasteResetBtn.addEventListener('click', resetPasteInput);
 
 addRelated(1);
 addAttach(2);
