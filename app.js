@@ -491,7 +491,7 @@ function generateDocument() {
   } else {
     lines.push('');
     attachments.forEach((item, idx) => {
-      const prefix = idx === 0 ? '붙임  ' : '      ';
+      const prefix = idx === 0 ? '붙임  ' : '        ';
       const suffix = idx === attachments.length - 1 ? '  끝.' : '';
       lines.push(`${prefix}${idx + 1}. ${removeFinalEnd(item)}${suffix}`);
     });
@@ -515,6 +515,12 @@ function finishLine(line) {
   return `${trimmed}.  끝.`;
 }
 
+function finishDocument(text) {
+  const trimmed = String(text || '').replace(/\s+$/g, '');
+  if (!trimmed) return '';
+  return finishLine(trimmed);
+}
+
 function escapeRegExp(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -530,19 +536,25 @@ function renumberPastedText() {
   }
 
   const markerPattern = itemMarkers.map(escapeRegExp).join('|');
-  // 번호 뒤 공백이 없어도 '1.관련', '3)문장', '가.일시'처럼 항목으로 인식한다.
-  // 단, '1.2.'처럼 점 뒤에 숫자가 바로 이어지는 값은 문단 번호로 보지 않는다.
-  const koreanPattern = new RegExp(`^(\\s*)(${markerPattern})\\s*(?:[)]\\s*|[.．](?:\\s+|(?=[가-힣A-Za-z0-9])))`);
-  // 1~99까지만 본문 번호로 봐서 '2026. 8. 20.' 같은 날짜는 건드리지 않는다.
-  const numberPattern = /^(\s*)(\d{1,2})\s*(?:[)]\s*|[.．](?:\s+|(?=[가-힣A-Za-z])))/;
-  const attachmentStartPattern = /^(\s*)(붙임\s+)(\d{1,2})\s*(?:[)]\s*|[.．](?:\s+|(?=[가-힣A-Za-z])))/;
+  // 공문 항목 체계의 넷째 단계까지 구분한다: 1. → 가. → 1) → 가)
+  // 번호 뒤 공백이 없거나 항목 내용이 비어 있어도 순번으로 인식한다.
+  const koreanDotPattern = new RegExp(`^(\\s*)(${markerPattern})\\s*[.．](?:\\s+|$|(?=[가-힣A-Za-z0-9]))`);
+  const koreanParenPattern = new RegExp(`^(\\s*)(${markerPattern})\\s*[)](?:\\s+|$|(?=[가-힣A-Za-z0-9]))`);
+  // 1~99까지만 순번으로 봐서 '2026. 8. 20.' 같은 날짜는 건드리지 않는다.
+  const numberDotPattern = /^(\s*)(\d{1,2})\s*[.．](?:\s+|$|(?=[가-힣A-Za-z]))/;
+  const numberParenPattern = /^(\s*)(\d{1,2})\s*[)](?:\s+|$|(?=[가-힣A-Za-z]))/;
+  const attachmentStartPattern = /^(\s*)(붙임\s+)(\d{1,2})\s*(?:[)](?:\s+|$)|[.．](?:\s+|$|(?=[가-힣A-Za-z])))/;
 
   let bodyNumber = 1;
-  let koreanIndex = 0;
+  let koreanDotIndex = 0;
+  let subNumber = 1;
+  let koreanParenIndex = 0;
   let attachmentNumber = 1;
   let inAttachmentBlock = false;
   let bodyNumberCount = 0;
-  let koreanCount = 0;
+  let koreanDotCount = 0;
+  let subNumberCount = 0;
+  let koreanParenCount = 0;
   let attachmentCount = 0;
 
   const resultLines = raw.split('\n').map(line => {
@@ -552,21 +564,18 @@ function renumberPastedText() {
     const attachmentStart = line.match(attachmentStartPattern);
     if (attachmentStart) {
       inAttachmentBlock = true;
-      const indent = attachmentStart[1] || '';
-      const prefix = attachmentStart[2] || '붙임  ';
       const content = line.slice(attachmentStart[0].length);
-      const next = `${indent}${prefix}${attachmentNumber}. ${content}`;
+      const next = `붙임  ${attachmentNumber}. ${content}`;
       attachmentNumber += 1;
       attachmentCount += 1;
       return next;
     }
 
     if (inAttachmentBlock) {
-      const attachmentItem = line.match(numberPattern);
+      const attachmentItem = line.match(numberDotPattern);
       if (attachmentItem) {
-        const indent = attachmentItem[1] || '';
         const content = line.slice(attachmentItem[0].length);
-        const next = `${indent}${attachmentNumber}. ${content}`;
+        const next = `        ${attachmentNumber}. ${content}`;
         attachmentNumber += 1;
         attachmentCount += 1;
         return next;
@@ -574,46 +583,77 @@ function renumberPastedText() {
       return line;
     }
 
-    const bodyItem = isShortDateLine ? null : line.match(numberPattern);
+    const bodyItem = isShortDateLine ? null : line.match(numberDotPattern);
     if (bodyItem) {
-      const indent = bodyItem[1] || '';
       const content = line.slice(bodyItem[0].length);
-      const next = `${indent}${bodyNumber}. ${content}`;
+      const next = `${bodyNumber}. ${content}`;
       bodyNumber += 1;
       bodyNumberCount += 1;
-      // 새 상위 숫자 문단이 시작되면 그 아래 가나다도 다시 '가.'부터 시작한다.
-      koreanIndex = 0;
+      // 새 상위 숫자 문단이 시작되면 모든 하위 순번을 처음부터 다시 센다.
+      koreanDotIndex = 0;
+      subNumber = 1;
+      koreanParenIndex = 0;
       return next;
     }
 
-    const koreanItem = line.match(koreanPattern);
-    if (koreanItem) {
-      const indent = koreanItem[1] || '';
-      const originalMarker = koreanItem[2];
-      const content = line.slice(koreanItem[0].length);
-      const nextMarker = itemMarkers[koreanIndex] || originalMarker;
-      koreanIndex += 1;
-      koreanCount += 1;
-      return `${indent}${nextMarker}. ${content}`;
+    const koreanDotItem = line.match(koreanDotPattern);
+    if (koreanDotItem) {
+      const originalMarker = koreanDotItem[2];
+      const content = line.slice(koreanDotItem[0].length);
+      const nextMarker = itemMarkers[koreanDotIndex] || originalMarker;
+      koreanDotIndex += 1;
+      koreanDotCount += 1;
+      subNumber = 1;
+      koreanParenIndex = 0;
+      return `  ${nextMarker}. ${content}`;
+    }
+
+    const subNumberItem = line.match(numberParenPattern);
+    if (subNumberItem) {
+      const content = line.slice(subNumberItem[0].length);
+      const next = `    ${subNumber}) ${content}`;
+      subNumber += 1;
+      subNumberCount += 1;
+      koreanParenIndex = 0;
+      return next;
+    }
+
+    const koreanParenItem = line.match(koreanParenPattern);
+    if (koreanParenItem) {
+      const originalMarker = koreanParenItem[2];
+      const content = line.slice(koreanParenItem[0].length);
+      const nextMarker = itemMarkers[koreanParenIndex] || originalMarker;
+      koreanParenIndex += 1;
+      koreanParenCount += 1;
+      return `      ${nextMarker}) ${content}`;
     }
 
     return line;
   });
 
-  const result = resultLines.join('\n');
-  const totalCount = bodyNumberCount + koreanCount + attachmentCount;
+  if (attachmentCount === 1) {
+    const onlyAttachmentIndex = resultLines.findIndex(line => /^붙임  1[.]\s*/.test(line));
+    if (onlyAttachmentIndex >= 0) {
+      resultLines[onlyAttachmentIndex] = resultLines[onlyAttachmentIndex].replace(/^붙임  1[.]\s*/, '붙임  ');
+    }
+  }
+
+  const result = finishDocument(resultLines.join('\n'));
+  const totalCount = bodyNumberCount + koreanDotCount + subNumberCount + koreanParenCount + attachmentCount;
   showResultPreview(result);
 
   if (totalCount > 0) {
     const parts = [];
     if (bodyNumberCount) parts.push(`본문 숫자 ${bodyNumberCount}`);
-    if (koreanCount) parts.push(`가나다 ${koreanCount}`);
+    if (koreanDotCount) parts.push(`가나다 ${koreanDotCount}`);
+    if (subNumberCount) parts.push(`1) 순번 ${subNumberCount}`);
+    if (koreanParenCount) parts.push(`가) 순번 ${koreanParenCount}`);
     if (attachmentCount) parts.push(`붙임 ${attachmentCount}`);
     setStatus(`✓ 순번 정리 완료 · ${parts.join(' · ')}`, 'success');
     showToast(`✓ 순번 ${totalCount}개를 정리했어요`, 'success');
   } else {
     setStatus('정리할 순번 없음');
-    showToast('정리할 1·2·3 / 가·나·다 항목이 없어요', 'success');
+    showToast('정리할 1. / 가. / 1) / 가) 항목이 없어요', 'success');
   }
   scrollToResultOnMobile();
   return result;
@@ -636,8 +676,8 @@ function switchMode(mode) {
   pasteModeBtn.setAttribute('aria-selected', String(!isCompose));
   generateBtn.textContent = isCompose ? '✨ 공문 생성하기' : '✨ 순번 정리하기';
   if (sourceTitle) sourceTitle.textContent = isCompose ? '새 공문 작성' : '공문 원문';
-  if (sourceDescription) sourceDescription.textContent = isCompose ? '항목을 칸칸이 입력하면 빈 항목을 제외하고 순번을 자동으로 붙입니다.' : '이미 작성한 공문을 그대로 붙여넣으세요. 순번만 다시 맞춰드립니다.';
-  if (actionHelp) actionHelp.textContent = isCompose ? '입력한 항목을 모아 공문 형태로 생성합니다.' : '1·2·3 / 가·나·다 / 붙임 번호를 한 번에 정리합니다.';
+  if (sourceDescription) sourceDescription.textContent = isCompose ? '항목을 칸칸이 입력하면 빈 항목을 제외하고 순번을 자동으로 붙입니다.' : '이미 작성한 공문을 그대로 붙여넣으세요. 순번과 들여쓰기를 다시 맞춰드립니다.';
+  if (actionHelp) actionHelp.textContent = isCompose ? '입력한 항목을 모아 공문 형태로 생성합니다.' : '1. → 가. → 1) → 가) 순번과 들여쓰기를 한 번에 정리합니다.';
   if (resultDescription) {
     resultDescription.textContent = isCompose ? '생성된 공문을 직접 수정한 뒤 복사하거나 저장하세요.' : '정리된 결과를 직접 수정한 뒤 복사하거나 저장하세요.';
   }
@@ -755,8 +795,26 @@ function scrollToPageTop() {
 }
 
 const topBar = document.getElementById('topBar');
-const topBarBtn = document.getElementById('topBarBtn');
 const floatingTopBtn = document.getElementById('floatingTopBtn');
+const helpBtn = document.getElementById('helpBtn');
+const helpModal = document.getElementById('helpModal');
+const helpCloseButtons = document.querySelectorAll('[data-close-help]');
+let helpTrigger = null;
+
+function openHelp() {
+  if (!helpModal) return;
+  helpTrigger = document.activeElement;
+  helpModal.hidden = false;
+  document.body.classList.add('modal-open');
+  helpModal.querySelector('.help-close-btn')?.focus();
+}
+
+function closeHelp() {
+  if (!helpModal || helpModal.hidden) return;
+  helpModal.hidden = true;
+  document.body.classList.remove('modal-open');
+  if (helpTrigger instanceof HTMLElement) helpTrigger.focus();
+}
 
 function updateTopButtons() {
   const scrolled = window.scrollY > 80;
@@ -764,7 +822,16 @@ function updateTopButtons() {
   if (floatingTopBtn) floatingTopBtn.classList.toggle('is-visible', scrolled);
 }
 
-if (topBarBtn) topBarBtn.addEventListener('click', scrollToPageTop);
+if (helpBtn) helpBtn.addEventListener('click', openHelp);
+helpCloseButtons.forEach(button => button.addEventListener('click', closeHelp));
+if (helpModal) {
+  helpModal.addEventListener('click', event => {
+    if (event.target === helpModal) closeHelp();
+  });
+}
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && helpModal && !helpModal.hidden) closeHelp();
+});
 if (floatingTopBtn) floatingTopBtn.addEventListener('click', scrollToPageTop);
 window.addEventListener('scroll', updateTopButtons, { passive: true });
 updateTopButtons();
