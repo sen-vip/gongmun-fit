@@ -491,7 +491,7 @@ function generateDocument() {
   } else {
     lines.push('');
     attachments.forEach((item, idx) => {
-      const prefix = idx === 0 ? '붙임  ' : '        ';
+      const prefix = idx === 0 ? '붙임  ' : '      ';
       const suffix = idx === attachments.length - 1 ? '  끝.' : '';
       lines.push(`${prefix}${idx + 1}. ${removeFinalEnd(item)}${suffix}`);
     });
@@ -575,7 +575,7 @@ function renumberPastedText() {
       const attachmentItem = line.match(numberDotPattern);
       if (attachmentItem) {
         const content = line.slice(attachmentItem[0].length);
-        const next = `        ${attachmentNumber}. ${content}`;
+        const next = `      ${attachmentNumber}. ${content}`;
         attachmentNumber += 1;
         attachmentCount += 1;
         return next;
