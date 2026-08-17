@@ -14,7 +14,7 @@
         <div class="sticky-title-row">
           <span class="sticky-app-icon" aria-hidden="true">📝</span>
           <strong class="sticky-app-name">공문핏</strong>
-          <span class="sticky-version">v1.12.3</span>
+          <span class="sticky-version">v1.13.0</span>
         </div>
         <p class="sticky-subtitle">공문 순번 정리 도구 · 외부 전송 없음</p>
       </div>
@@ -32,6 +32,20 @@
         <input id="docTitle" class="input title-inline-input" type="text" value="2000학년도 OO 실시" placeholder="예: 2026학년도 체험학습 실시" />
         <span class="title-file-hint">TXT 저장 파일명</span>
       </div>
+    </section>
+
+    <section id="demoCard" class="demo-card" aria-label="공문핏 체험하기">
+      <div class="demo-card-icon" aria-hidden="true">✦</div>
+      <div class="demo-card-copy">
+        <div class="demo-card-title-row">
+          <strong>공문핏이 처음이라면</strong>
+          <span id="demoCardBadge" class="demo-card-badge">샘플 제공</span>
+        </div>
+        <p>직접 입력하지 않아도 돼요. 일부러 뒤섞은 공문이 어떻게 정리되는지 바로 확인해보세요.</p>
+      </div>
+      <button id="demoBtn" class="demo-btn" type="button">
+        <span id="demoBtnLabel">공문핏 체험하기</span><span class="demo-btn-arrow" aria-hidden="true">→</span>
+      </button>
     </section>
 
     <div class="workbench">
@@ -142,6 +156,16 @@
               <h2>결과 확인 · 수정</h2>
               <p id="resultDescription">정리된 결과를 직접 수정한 뒤 복사하거나 저장하세요.</p>
             </div>
+          </div>
+          <div id="demoNotice" class="demo-result-notice" hidden>
+            <div class="demo-result-copy">
+              <span class="demo-result-mark" aria-hidden="true">✦</span>
+              <div>
+                <strong>체험용 예시입니다</strong>
+                <span>왼쪽의 뒤섞인 순번이 오른쪽처럼 정리됐어요.</span>
+              </div>
+            </div>
+            <button id="exitDemoBtn" class="demo-exit-btn" type="button">내 공문 작성하기</button>
           </div>
           <div class="result-action-switch" aria-label="결과 내보내기">
             <button id="copyBtn" class="result-action-btn" type="button"><span aria-hidden="true">📋</span><span>복사하기</span></button>

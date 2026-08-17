@@ -19,10 +19,30 @@ const resultDescription = document.getElementById('resultDescription');
 const sourceTitle = document.getElementById('sourceTitle');
 const sourceDescription = document.getElementById('sourceDescription');
 const actionHelp = document.getElementById('actionHelp');
+const docTitle = document.getElementById('docTitle');
+const demoCard = document.getElementById('demoCard');
+const demoBtn = document.getElementById('demoBtn');
+const demoBtnLabel = document.getElementById('demoBtnLabel');
+const demoCardBadge = document.getElementById('demoCardBadge');
+const demoNotice = document.getElementById('demoNotice');
+const exitDemoBtn = document.getElementById('exitDemoBtn');
 
 let hasGeneratedResult = false;
 let toastTimer = null;
 let activeMode = 'paste';
+let isDemoMode = false;
+
+const DEMO_TITLE = '2026학년도 교직원 안전교육 실시';
+const DEMO_TEXT = `1. 관련: 교육과-1234(2026. 8. 10.)
+3. 2026학년도 교직원 안전교육을 다음과 같이 실시하고자 합니다.
+ 나. 일시: 2026. 8. 20.(목) 15:00
+ 다. 장소: 시청각실
+ 다. 대상: 전 교직원
+ 라. 내용: 생활안전 및 응급상황 대응 교육
+4. 행정사항: 전 교직원은 교육에 참석하여 주시기 바랍니다.
+
+붙임 1. 교직원 안전교육 계획(안) 1부.
+    22. 교육자료 1부.`;
 
 const DEFAULT_MAIN_SENTENCE = '2000학년도 OO을 다음과 같이 OO하고자 합니다.';
 const RELATED_SAMPLE = 'OO과-0000(2020. 00. 00.)';
@@ -663,6 +683,39 @@ function generateActiveMode() {
   return activeMode === 'paste' ? renumberPastedText() : generateDocument();
 }
 
+function setDemoMode(active) {
+  isDemoMode = Boolean(active);
+  if (demoNotice) demoNotice.hidden = !isDemoMode;
+  if (demoCard) demoCard.classList.toggle('is-active', isDemoMode);
+  if (demoBtnLabel) demoBtnLabel.textContent = isDemoMode ? '체험 다시보기' : '공문핏 체험하기';
+  if (demoCardBadge) demoCardBadge.textContent = isDemoMode ? '체험 중' : '샘플 제공';
+}
+
+function startDemo() {
+  if (activeMode !== 'paste') switchMode('paste');
+  if (docTitle) docTitle.value = DEMO_TITLE;
+  if (pasteInput) pasteInput.value = DEMO_TEXT;
+  setDemoMode(true);
+  renumberPastedText();
+  showToast('✦ 체험용 공문을 정리했어요', 'success');
+}
+
+function exitDemo() {
+  setDemoMode(false);
+  if (activeMode !== 'paste') switchMode('paste');
+  if (docTitle) docTitle.value = '2000학년도 OO 실시';
+  if (pasteInput) pasteInput.value = '';
+  setEmptyPreview('이제 내 공문을 작성해보세요', '공문을 붙여넣고 순번 정리하기를 눌러보세요');
+  setStatus('작성 준비');
+  showToast('내 공문 작성 모드로 돌아왔어요', 'success');
+  window.requestAnimationFrame(() => {
+    if (window.matchMedia && window.matchMedia('(max-width: 900px)').matches) {
+      document.querySelector('.source-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    pasteInput?.focus();
+  });
+}
+
 function switchMode(mode) {
   if (mode !== 'compose' && mode !== 'paste') return;
   activeMode = mode;
@@ -732,6 +785,7 @@ function downloadTxt() {
 function resetForm() {
   const ok = window.confirm('작성 중인 내용을 모두 초기화할까요?');
   if (!ok) return;
+  setDemoMode(false);
 
   document.getElementById('docTitle').value = '2000학년도 OO 실시';
   document.getElementById('mainSentence').value = DEFAULT_MAIN_SENTENCE;
@@ -758,6 +812,7 @@ function resetPasteInput() {
     const ok = window.confirm('붙여넣은 내용을 지울까요?');
     if (!ok) return;
   }
+  setDemoMode(false);
   pasteInput.value = '';
   setEmptyPreview('붙여넣기 내용을 지웠어요', '공문을 붙여넣고 순번 정리하기를 눌러보세요');
   setStatus('초기화 완료');
@@ -772,9 +827,11 @@ document.getElementById('downloadBtn').addEventListener('click', downloadTxt);
 document.getElementById('resetBtn').addEventListener('click', resetForm);
 document.getElementById('mainSentence').addEventListener('input', e => autoResize(e.target));
 if (addBodyItemBtn) addBodyItemBtn.addEventListener('click', addBodyItem);
-if (composeModeBtn) composeModeBtn.addEventListener('click', () => switchMode('compose'));
-if (pasteModeBtn) pasteModeBtn.addEventListener('click', () => switchMode('paste'));
+if (composeModeBtn) composeModeBtn.addEventListener('click', () => { setDemoMode(false); switchMode('compose'); });
+if (pasteModeBtn) pasteModeBtn.addEventListener('click', () => { setDemoMode(false); switchMode('paste'); });
 if (pasteResetBtn) pasteResetBtn.addEventListener('click', resetPasteInput);
+if (demoBtn) demoBtn.addEventListener('click', startDemo);
+if (exitDemoBtn) exitDemoBtn.addEventListener('click', exitDemo);
 
 if (resultPreview) {
   resultPreview.addEventListener('input', () => {
