@@ -14,7 +14,7 @@
         <div class="sticky-title-row">
           <span class="sticky-app-icon" aria-hidden="true">📝</span>
           <strong class="sticky-app-name">공문핏</strong>
-          <span class="sticky-version">v1.13.1</span>
+          <span class="sticky-version">v1.13.2</span>
         </div>
         <p class="sticky-subtitle">공문 순번 정리 도구 · 외부 전송 없음</p>
       </div>
@@ -75,6 +75,14 @@
               <span>1. → 가. → 1) → 가) 순번과 들여쓰기를 단계별로 정리합니다.</span>
             </div>
             <textarea id="pasteInput" class="textarea paste-textarea document-input" rows="18" spellcheck="false" placeholder="1.관련: 학돌중학교-1234(2026. 8. 5.)&#10;3. 2026학년도 교직원 안전교육을 다음과 같이 실시하고자 합니다.&#10;  가. 일시: 2026. 8. 20.(목) 15:00&#10;  나. 장소: 시청각실&#10;  나. 대상: 전 교직원&#10;  라. 내용: 생활안전 및 응급상황 대응 교육&#10;4. 행정사항: 전 교직원은 교육에 참석하여 주시기 바랍니다.&#10;&#10;붙임 1. 교직원 안전교육 계획(안) 1부.&#10;    22. 교육자료 1부. 끝."></textarea>
+
+            <div id="pasteActionAnchor" class="action-anchor">
+              <div id="sourceActionRow" class="source-action-row">
+                <p id="actionHelp" class="source-action-help">1. → 가. → 1) → 가) 순번과 들여쓰기를 한 번에 정리합니다.</p>
+                <button id="generateBtn" class="primary-btn source-primary-btn" type="button">✨ 순번 정리하기</button>
+              </div>
+            </div>
+
             <div class="mode-sub-actions">
               <button id="pasteResetBtn" class="reset-btn reset-safe-btn" type="button">붙여넣기 내용 지우기</button>
             </div>
@@ -111,6 +119,8 @@
               </div>
             </div>
 
+            <div id="composeActionAnchor" class="action-anchor"></div>
+
             <div class="paper-section attach-section">
               <div class="attach-layout">
                 <div class="paper-subtitle attach-title">붙임</div>
@@ -134,10 +144,6 @@
             </div>
           </section>
 
-          <div class="source-action-row">
-            <p id="actionHelp" class="source-action-help">1. → 가. → 1) → 가) 순번과 들여쓰기를 한 번에 정리합니다.</p>
-            <button id="generateBtn" class="primary-btn source-primary-btn" type="button">✨ 순번 정리하기</button>
-          </div>
 
           <div class="paste-guide compact-guide" aria-label="순번 정리 안내">
             <span><strong>정리 기준</strong> 1. / 가. / 1) / 가) 앞을 각각 0·2·4·6칸으로 맞춥니다.</span>

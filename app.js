@@ -19,6 +19,9 @@ const resultDescription = document.getElementById('resultDescription');
 const sourceTitle = document.getElementById('sourceTitle');
 const sourceDescription = document.getElementById('sourceDescription');
 const actionHelp = document.getElementById('actionHelp');
+const sourceActionRow = document.getElementById('sourceActionRow');
+const pasteActionAnchor = document.getElementById('pasteActionAnchor');
+const composeActionAnchor = document.getElementById('composeActionAnchor');
 const docTitle = document.getElementById('docTitle');
 const demoCard = document.getElementById('demoCard');
 const demoBtn = document.getElementById('demoBtn');
@@ -723,6 +726,11 @@ function switchMode(mode) {
 
   composeMode.hidden = !isCompose;
   pasteMode.hidden = isCompose;
+
+  const actionTarget = isCompose ? composeActionAnchor : pasteActionAnchor;
+  if (sourceActionRow && actionTarget && sourceActionRow.parentElement !== actionTarget) {
+    actionTarget.appendChild(sourceActionRow);
+  }
   composeModeBtn.classList.toggle('is-active', isCompose);
   pasteModeBtn.classList.toggle('is-active', !isCompose);
   composeModeBtn.setAttribute('aria-selected', String(isCompose));
