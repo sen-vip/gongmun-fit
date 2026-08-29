@@ -14,7 +14,7 @@
         <div class="sticky-title-row">
           <span class="sticky-app-icon" aria-hidden="true">📝</span>
           <strong class="sticky-app-name">공문핏</strong>
-          <span class="sticky-version">v1.13.2</span>
+          <span class="sticky-version">v1.13.23</span>
         </div>
         <p class="sticky-subtitle">공문 순번 정리 도구 · 외부 전송 없음</p>
       </div>
@@ -31,21 +31,9 @@
         <label for="docTitle" class="title-inline-label">제목</label>
         <input id="docTitle" class="input title-inline-input" type="text" value="2000학년도 OO 실시" placeholder="예: 2026학년도 체험학습 실시" />
         <span class="title-file-hint">TXT 저장 파일명</span>
+        <span class="title-action-spacer" aria-hidden="true"></span>
+        <button id="sourceResetBtn" class="source-reset-btn title-reset-btn" type="button">↺ 입력 비우기</button>
       </div>
-    </section>
-
-    <section id="demoCard" class="demo-card" aria-label="공문핏 체험하기">
-      <div class="demo-card-icon" aria-hidden="true">✦</div>
-      <div class="demo-card-copy">
-        <div class="demo-card-title-row">
-          <strong>공문핏이 처음이라면</strong>
-          <span id="demoCardBadge" class="demo-card-badge">샘플 제공</span>
-        </div>
-        <p>직접 입력하지 않아도 돼요. 일부러 뒤섞은 공문이 어떻게 정리되는지 바로 확인해보세요.</p>
-      </div>
-      <button id="demoBtn" class="demo-btn" type="button">
-        <span id="demoBtnLabel">공문핏 체험하기</span><span class="demo-btn-arrow" aria-hidden="true">→</span>
-      </button>
     </section>
 
     <div class="workbench">
@@ -53,38 +41,38 @@
         <section class="panel source-panel" aria-label="원문 입력 영역">
           <div class="source-head">
             <div class="source-head-copy">
-              <span class="document-kicker">원문</span>
+              <span class="document-kicker compare-kicker">정리 전</span>
               <h2 id="sourceTitle">공문 원문</h2>
               <p id="sourceDescription">이미 작성한 공문을 그대로 붙여넣으세요. 순번과 들여쓰기를 다시 맞춰드립니다.</p>
             </div>
-            <span class="local-badge">외부 전송 없음</span>
+            <div class="source-head-actions">
+              <span class="local-badge">외부 전송 없음</span>
+            </div>
           </div>
 
           <div class="mode-switch" role="tablist" aria-label="작성 방법 선택">
             <button id="pasteModeBtn" class="mode-btn is-active" type="button" role="tab" aria-selected="true" aria-controls="pasteMode">
-              <span aria-hidden="true">📋</span><span>통째로 붙여넣기</span>
+              <span class="control-emoji" aria-hidden="true">📋</span><span>통째로 붙여넣기</span>
             </button>
             <button id="composeModeBtn" class="mode-btn" type="button" role="tab" aria-selected="false" aria-controls="composeMode">
-              <span aria-hidden="true">✍️</span><span>직접 작성</span>
+              <span class="control-emoji" aria-hidden="true">✍️</span><span>직접 작성</span>
             </button>
           </div>
 
           <section id="pasteMode" class="mode-panel source-mode-pane" aria-label="붙여넣기 순번 정리 영역">
+            <div id="pasteActionAnchor" class="action-anchor" aria-hidden="true"></div>
+            <div id="sourceActionRow" class="source-action-row">
+              <div class="source-action-copy">
+                <p id="actionHelp" class="source-action-help">붙여넣은 내용을 확인한 뒤 순번을 정리하세요.</p>
+              </div>
+              <button id="generateBtn" class="primary-btn source-primary-btn" type="button"><span class="control-emoji" aria-hidden="true">✨</span><span>순번 정리하기</span><span class="cta-arrow" aria-hidden="true">→</span></button>
+            </div>
+
+            <textarea id="pasteInput" class="textarea paste-textarea document-input" rows="18" spellcheck="false" placeholder="1.관련: 학돌중학교-1234(2026. 8. 5.)&#10;3. 2026학년도 교직원 안전교육을 다음과 같이 실시하고자 합니다.&#10;  가. 일시: 2026. 8. 20.(목) 15:00&#10;  나. 장소: 시청각실&#10;  나. 대상: 전 교직원&#10;  라. 내용: 생활안전 및 응급상황 대응 교육&#10;4. 행정사항: 전 교직원은 교육에 참석하여 주시기 바랍니다.&#10;&#10;붙임 1. 교직원 안전교육 계획(안) 1부.&#10;    22. 교육자료 1부. 끝."></textarea>
+
             <div class="paper-caption">
               <strong>공문을 그대로 붙여넣으세요</strong>
               <span>1. → 가. → 1) → 가) 순번과 들여쓰기를 단계별로 정리합니다.</span>
-            </div>
-            <textarea id="pasteInput" class="textarea paste-textarea document-input" rows="18" spellcheck="false" placeholder="1.관련: 학돌중학교-1234(2026. 8. 5.)&#10;3. 2026학년도 교직원 안전교육을 다음과 같이 실시하고자 합니다.&#10;  가. 일시: 2026. 8. 20.(목) 15:00&#10;  나. 장소: 시청각실&#10;  나. 대상: 전 교직원&#10;  라. 내용: 생활안전 및 응급상황 대응 교육&#10;4. 행정사항: 전 교직원은 교육에 참석하여 주시기 바랍니다.&#10;&#10;붙임 1. 교직원 안전교육 계획(안) 1부.&#10;    22. 교육자료 1부. 끝."></textarea>
-
-            <div id="pasteActionAnchor" class="action-anchor">
-              <div id="sourceActionRow" class="source-action-row">
-                <p id="actionHelp" class="source-action-help">1. → 가. → 1) → 가) 순번과 들여쓰기를 한 번에 정리합니다.</p>
-                <button id="generateBtn" class="primary-btn source-primary-btn" type="button">✨ 순번 정리하기</button>
-              </div>
-            </div>
-
-            <div class="mode-sub-actions">
-              <button id="pasteResetBtn" class="reset-btn reset-safe-btn" type="button">붙여넣기 내용 지우기</button>
             </div>
           </section>
 
@@ -93,6 +81,8 @@
               <strong>항목을 칸칸이 작성하세요</strong>
               <span>빈 항목은 제외하고 필요한 순번만 자동으로 붙습니다.</span>
             </div>
+
+            <div id="composeActionAnchor" class="action-anchor"></div>
 
             <div class="paper-section related-section">
               <div class="paper-line-head">
@@ -119,8 +109,6 @@
               </div>
             </div>
 
-            <div id="composeActionAnchor" class="action-anchor"></div>
-
             <div class="paper-section attach-section">
               <div class="attach-layout">
                 <div class="paper-subtitle attach-title">붙임</div>
@@ -138,10 +126,6 @@
               </div>
             </div>
 
-            <div class="reset-safe-zone">
-              <p class="reset-safe-note">작성 내용을 모두 지울 때만 사용하세요.</p>
-              <button id="resetBtn" class="reset-btn reset-safe-btn" type="button">전체 입력 초기화</button>
-            </div>
           </section>
 
 
@@ -158,7 +142,7 @@
         <section class="panel result-panel is-empty" aria-label="정리된 공문 영역">
           <div class="section-head result-head">
             <div>
-              <span class="document-kicker">정리된 공문</span>
+              <span class="document-kicker compare-kicker">정리 후</span>
               <h2>결과 확인 · 수정</h2>
               <p id="resultDescription">정리된 결과를 직접 수정한 뒤 복사하거나 저장하세요.</p>
             </div>
@@ -171,11 +155,11 @@
                 <span>왼쪽의 뒤섞인 순번이 오른쪽처럼 정리됐어요.</span>
               </div>
             </div>
-            <button id="exitDemoBtn" class="demo-exit-btn" type="button">내 공문 작성하기</button>
+            <button id="exitDemoBtn" class="demo-exit-btn" type="button">↺ 내 공문 시작하기</button>
           </div>
           <div class="result-action-switch" aria-label="결과 내보내기">
-            <button id="copyBtn" class="result-action-btn" type="button"><span aria-hidden="true">📋</span><span>복사하기</span></button>
-            <button id="downloadBtn" class="result-action-btn" type="button"><span aria-hidden="true">↓</span><span>TXT 저장</span></button>
+            <button id="copyBtn" class="result-action-btn" type="button"><span class="control-emoji" aria-hidden="true">📋</span><span>복사하기</span></button>
+            <button id="downloadBtn" class="result-action-btn" type="button"><span class="control-emoji" aria-hidden="true">↓</span><span>TXT 저장</span></button>
           </div>
           <div class="status-line"><span id="statusText" class="status">정리 전</span></div>
           <div class="document-sheet result-sheet">
@@ -186,10 +170,22 @@
             </div>
             <textarea id="resultPreview" class="result result-editor" rows="18" spellcheck="false" aria-label="정리 결과 편집" aria-live="polite"></textarea>
           </div>
-          <p class="result-edit-note">✎ 정리된 문장은 이곳에서 바로 수정할 수 있습니다. 수정 내용은 복사·TXT 저장에 그대로 반영됩니다.</p>
+          <p class="result-edit-note"><span aria-hidden="true">✎</span><span>정리된 문장은 이곳에서 바로 수정할 수 있습니다. 수정 내용은 복사·TXT 저장에 그대로 반영됩니다.</span></p>
         </section>
       </aside>
     </div>
+
+    <section id="demoCard" class="demo-card demo-card-bottom" aria-label="공문핏 체험하기">
+      <div class="demo-card-icon" aria-hidden="true">✦</div>
+      <div class="demo-card-copy">
+        <div class="demo-card-title-row">
+          <strong>공문핏이 처음인가요?</strong>
+          <span id="demoCardBadge" class="demo-card-badge">샘플 제공</span>
+        </div>
+        <p>뒤섞인 공문이 어떻게 정리되는지 샘플로 가볍게 확인해보세요.</p>
+      </div>
+      <button id="demoBtn" class="demo-btn" type="button"><span class="control-emoji" aria-hidden="true">✨</span><span id="demoBtnLabel">공문핏 체험하기</span><span class="demo-btn-arrow" aria-hidden="true">→</span></button>
+    </section>
   </main>
 
   <div id="helpModal" class="help-modal" hidden>
@@ -264,6 +260,23 @@
           <span aria-hidden="true">●</span>
           <p><strong>외부 전송 없음</strong> 입력한 내용은 외부 서버로 보내지지 않습니다. 공용 컴퓨터에서는 사용 후 입력 내용을 지워 주세요.</p>
         </aside>
+
+        <details class="update-history">
+          <summary>
+            <span>업데이트 기록</span>
+            <span class="update-history-current">현재 v1.13.23</span>
+          </summary>
+          <ul class="update-history-list">
+            <li><strong>v1.13.23</strong><span>정리 후와 활성 상태에 옅은 블루 컬러 위계를 더하고, 제목 입력칸이 남는 공간을 최대한 사용하도록 확장했습니다.</span></li>
+            <li><strong>v1.13.22</strong><span>이모지 아이콘을 복원하고 제목 크기, 네 기능 버튼 규격, 순번 정리 영역의 디자인 시스템을 다시 맞췄습니다.</span></li>
+            <li><strong>v1.13.21</strong><span>피그마풍 디자인 시스템을 적용해 타이포그래피, 라운드, 테두리와 버튼 위계를 정돈했습니다.</span></li>
+            <li><strong>v1.13.20</strong><span>제목 입력칸을 더 넓히고 오른쪽 결과 표출칸을 2px 위로 조정했습니다.</span></li>
+            <li><strong>v1.13.17</strong><span>정리 후 상단 여백과 결과 표출칸 위치를 미세 조정하고 업데이트 기록을 추가했습니다.</span></li>
+            <li><strong>v1.13.13</strong><span>입력 비우기·내 공문 시작하기 버튼을 제목 영역으로 이동했습니다.</span></li>
+            <li><strong>v1.13.4</strong><span>정리 전·정리 후를 1:1 비교하는 작업화면으로 개편하고 체험하기를 하단으로 이동했습니다.</span></li>
+            <li><strong>v1.13.0</strong><span>공문핏을 바로 확인할 수 있는 체험하기 기능을 추가했습니다.</span></li>
+          </ul>
+        </details>
       </div>
 
       <footer class="help-footer">

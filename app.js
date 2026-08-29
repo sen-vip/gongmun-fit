@@ -14,7 +14,6 @@ const pasteModeBtn = document.getElementById('pasteModeBtn');
 const composeMode = document.getElementById('composeMode');
 const pasteMode = document.getElementById('pasteMode');
 const pasteInput = document.getElementById('pasteInput');
-const pasteResetBtn = document.getElementById('pasteResetBtn');
 const resultDescription = document.getElementById('resultDescription');
 const sourceTitle = document.getElementById('sourceTitle');
 const sourceDescription = document.getElementById('sourceDescription');
@@ -29,6 +28,8 @@ const demoBtnLabel = document.getElementById('demoBtnLabel');
 const demoCardBadge = document.getElementById('demoCardBadge');
 const demoNotice = document.getElementById('demoNotice');
 const exitDemoBtn = document.getElementById('exitDemoBtn');
+const sourceResetBtn = document.getElementById('sourceResetBtn');
+
 
 let hasGeneratedResult = false;
 let toastTimer = null;
@@ -686,12 +687,33 @@ function generateActiveMode() {
   return activeMode === 'paste' ? renumberPastedText() : generateDocument();
 }
 
+function updateSourceResetButton() {
+  if (!sourceResetBtn) return;
+  sourceResetBtn.classList.toggle('is-demo-exit', isDemoMode);
+  if (isDemoMode) {
+    sourceResetBtn.textContent = '↺ 내 공문 시작하기';
+    sourceResetBtn.setAttribute('aria-label', '체험 내용을 비우고 내 공문 작성 시작하기');
+    return;
+  }
+  const isCompose = activeMode === 'compose';
+  sourceResetBtn.textContent = isCompose ? '↺ 전체 입력 초기화' : '↺ 입력 비우기';
+  sourceResetBtn.setAttribute('aria-label', isCompose ? '직접 작성 내용 전체 초기화' : '붙여넣기 입력 비우기');
+}
+
 function setDemoMode(active) {
   isDemoMode = Boolean(active);
   if (demoNotice) demoNotice.hidden = !isDemoMode;
   if (demoCard) demoCard.classList.toggle('is-active', isDemoMode);
   if (demoBtnLabel) demoBtnLabel.textContent = isDemoMode ? '체험 다시보기' : '공문핏 체험하기';
   if (demoCardBadge) demoCardBadge.textContent = isDemoMode ? '체험 중' : '샘플 제공';
+  updateSourceResetButton();
+  if (resultDescription) {
+    if (isDemoMode && activeMode === 'paste') {
+      resultDescription.textContent = '체험용 예시 결과입니다. 뒤섞인 순번이 오른쪽처럼 정리되는 모습을 확인해보세요.';
+    } else {
+      resultDescription.textContent = activeMode === 'compose' ? '생성된 공문을 직접 수정한 뒤 복사하거나 저장하세요.' : '정리된 결과를 직접 수정한 뒤 복사하거나 저장하세요.';
+    }
+  }
 }
 
 function startDemo() {
@@ -701,6 +723,11 @@ function startDemo() {
   setDemoMode(true);
   renumberPastedText();
   showToast('✦ 체험용 공문을 정리했어요', 'success');
+  window.requestAnimationFrame(() => {
+    if (window.matchMedia && window.matchMedia('(min-width: 901px)').matches) {
+      document.querySelector('.workbench')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
 }
 
 function exitDemo() {
@@ -728,19 +755,24 @@ function switchMode(mode) {
   pasteMode.hidden = isCompose;
 
   const actionTarget = isCompose ? composeActionAnchor : pasteActionAnchor;
-  if (sourceActionRow && actionTarget && sourceActionRow.parentElement !== actionTarget) {
-    actionTarget.appendChild(sourceActionRow);
+  if (sourceActionRow && actionTarget && sourceActionRow.previousElementSibling !== actionTarget) {
+    actionTarget.insertAdjacentElement('afterend', sourceActionRow);
   }
   composeModeBtn.classList.toggle('is-active', isCompose);
   pasteModeBtn.classList.toggle('is-active', !isCompose);
   composeModeBtn.setAttribute('aria-selected', String(isCompose));
   pasteModeBtn.setAttribute('aria-selected', String(!isCompose));
-  generateBtn.textContent = isCompose ? '✨ 공문 생성하기' : '✨ 순번 정리하기';
+  generateBtn.innerHTML = `<span class="control-emoji" aria-hidden="true">✨</span><span>${isCompose ? '공문 생성하기' : '순번 정리하기'}</span><span class="cta-arrow" aria-hidden="true">→</span>`;
   if (sourceTitle) sourceTitle.textContent = isCompose ? '새 공문 작성' : '공문 원문';
   if (sourceDescription) sourceDescription.textContent = isCompose ? '항목을 칸칸이 입력하면 빈 항목을 제외하고 순번을 자동으로 붙입니다.' : '이미 작성한 공문을 그대로 붙여넣으세요. 순번과 들여쓰기를 다시 맞춰드립니다.';
-  if (actionHelp) actionHelp.textContent = isCompose ? '입력한 항목을 모아 공문 형태로 생성합니다.' : '1. → 가. → 1) → 가) 순번과 들여쓰기를 한 번에 정리합니다.';
+  if (actionHelp) actionHelp.textContent = isCompose ? '작성한 내용을 확인한 뒤 공문을 생성하세요.' : '붙여넣은 내용을 확인한 뒤 순번을 정리하세요.';
+  updateSourceResetButton();
   if (resultDescription) {
-    resultDescription.textContent = isCompose ? '생성된 공문을 직접 수정한 뒤 복사하거나 저장하세요.' : '정리된 결과를 직접 수정한 뒤 복사하거나 저장하세요.';
+    if (isDemoMode && !isCompose) {
+      resultDescription.textContent = '체험용 예시 결과입니다. 뒤섞인 순번이 오른쪽처럼 정리되는 모습을 확인해보세요.';
+    } else {
+      resultDescription.textContent = isCompose ? '생성된 공문을 직접 수정한 뒤 복사하거나 저장하세요.' : '정리된 결과를 직접 수정한 뒤 복사하거나 저장하세요.';
+    }
   }
 
   if (isCompose) {
@@ -832,14 +864,20 @@ document.getElementById('addAttachBtn').addEventListener('click', () => addAttac
 generateBtn.addEventListener('click', generateActiveMode);
 document.getElementById('copyBtn').addEventListener('click', copyResult);
 document.getElementById('downloadBtn').addEventListener('click', downloadTxt);
-document.getElementById('resetBtn').addEventListener('click', resetForm);
 document.getElementById('mainSentence').addEventListener('input', e => autoResize(e.target));
 if (addBodyItemBtn) addBodyItemBtn.addEventListener('click', addBodyItem);
 if (composeModeBtn) composeModeBtn.addEventListener('click', () => { setDemoMode(false); switchMode('compose'); });
 if (pasteModeBtn) pasteModeBtn.addEventListener('click', () => { setDemoMode(false); switchMode('paste'); });
-if (pasteResetBtn) pasteResetBtn.addEventListener('click', resetPasteInput);
 if (demoBtn) demoBtn.addEventListener('click', startDemo);
 if (exitDemoBtn) exitDemoBtn.addEventListener('click', exitDemo);
+if (sourceResetBtn) sourceResetBtn.addEventListener('click', () => {
+  if (isDemoMode) {
+    exitDemo();
+    return;
+  }
+  if (activeMode === 'compose') resetForm();
+  else resetPasteInput();
+});
 
 if (resultPreview) {
   resultPreview.addEventListener('input', () => {

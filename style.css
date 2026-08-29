@@ -33,8 +33,10 @@ button,input,textarea{font:inherit}
 .header-action-btn:hover{background:#f8fafc;border-color:#cbd5e1;color:#0f172a;transform:translateY(-1px)}
 .header-action-btn:focus-visible{outline:3px solid rgba(37,99,235,.18);outline-offset:2px}
 .panel{background:var(--surface);border:1px solid var(--line-soft);border-radius:20px;box-shadow:var(--shadow-soft)}
-.title-panel{padding:10px 14px;margin:0 0 12px;background:#fbfcfe;border-radius:15px;box-shadow:none}
-.title-inline-field{display:grid;grid-template-columns:auto minmax(0,420px) auto;gap:10px;align-items:center}
+.title-panel{padding:10px 18px;margin:0 0 12px;background:#fbfcfe;border-radius:15px;box-shadow:none}
+.title-inline-field{display:grid;grid-template-columns:auto minmax(0,850px) auto minmax(16px,1fr) auto;gap:10px;align-items:center}
+.title-action-spacer{min-width:0}
+.title-reset-btn{justify-self:end;min-height:32px;padding:0 11px}
 .title-inline-label{color:#334155;font-size:13px;font-weight:900;letter-spacing:-.025em}
 .title-inline-input{height:38px;border-radius:10px;font-size:13.5px;background:#fff}
 .title-file-hint{color:#94a3b8;font-size:11.5px;font-weight:650;white-space:nowrap}
@@ -43,6 +45,12 @@ button,input,textarea{font:inherit}
 .source-panel{padding:18px;background:#f8fafc;border-color:#dfe7f0}
 .source-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:12px}
 .source-head-copy{min-width:0}
+.source-head-actions{flex:0 0 auto;display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.source-reset-btn{min-height:30px;padding:0 10px;border:1px solid #d8e0e9;border-radius:999px;background:#fff;color:#64748b;font-size:11.5px;font-weight:850;white-space:nowrap;cursor:pointer;transition:.14s ease}
+.source-reset-btn:hover{border-color:#f4b8bb;background:#fff8f8;color:#c24145}
+.source-reset-btn.is-demo-exit{border-color:#bfdbfe;background:#eff6ff;color:#1d4ed8}
+.source-reset-btn.is-demo-exit:hover{border-color:#93c5fd;background:#dbeafe;color:#1e40af}
+.source-reset-btn:focus-visible{outline:3px solid rgba(37,99,235,.15);outline-offset:2px}
 .document-kicker{display:block;margin:0 0 4px;color:#64748b;font-size:11.5px;font-weight:900;letter-spacing:.01em}
 .source-head h2,.result-head h2{margin:0;color:#0f172a;font-size:19px;line-height:1.25;letter-spacing:-.045em}
 .source-head p,.result-head p{margin:5px 0 0;color:#64748b;font-size:12.5px;line-height:1.5;font-weight:550;letter-spacing:-.02em}
@@ -66,12 +74,13 @@ button,input,textarea{font:inherit}
 .document-input{min-height:500px;max-height:none;resize:vertical;overflow:auto;padding:24px 26px;border-radius:6px;background:#fff;border:1px solid #d8e0e9;box-shadow:var(--paper-shadow);font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif;font-size:14px;line-height:1.68;white-space:pre-wrap}
 .document-input::placeholder{color:#526073;opacity:1}
 .mode-sub-actions{display:flex;justify-content:flex-end;margin-top:9px}
-.action-anchor{min-width:0}
-.source-action-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:12px;padding:10px 10px 10px 13px;border:1px solid #d7e3f4;border-radius:14px;background:rgba(248,250,252,.96);box-shadow:0 8px 22px rgba(15,23,42,.07);backdrop-filter:blur(10px)}
-.source-action-help{margin:0;color:#64748b;font-size:12.5px;line-height:1.45;font-weight:650}
-.source-primary-btn{flex:0 0 auto;min-width:202px;min-height:46px;padding:0 20px;border-radius:12px;font-size:14px}
-#composeActionAnchor{margin-top:18px;padding-top:2px}
-@media (min-width:901px){.source-action-row{position:sticky;bottom:12px;z-index:30}}
+.action-anchor{display:none}
+.source-action-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 0 12px;padding:11px 11px 11px 13px;border:1px solid #bfd6ff;border-radius:14px;background:rgba(239,246,255,.97);box-shadow:0 8px 22px rgba(37,99,235,.08);backdrop-filter:blur(10px)}
+.source-action-copy{min-width:0;display:flex;align-items:center;gap:9px}
+.source-action-step{width:25px;height:25px;display:grid;place-items:center;flex:0 0 auto;border-radius:8px;background:#2563eb;color:#fff;font-size:11px;font-weight:950;box-shadow:0 5px 12px rgba(37,99,235,.18)}
+.source-action-help{margin:0;color:#3f5f91;font-size:12.5px;line-height:1.45;font-weight:750}
+.source-primary-btn{flex:0 0 auto;min-width:218px;min-height:50px;padding:0 22px;border-radius:12px;font-size:14.5px;letter-spacing:-.02em;box-shadow:0 10px 24px rgba(37,99,235,.22)}
+@media (min-width:901px){.source-action-row{position:sticky;top:78px;z-index:35}}
 .compact-guide{margin-top:10px;padding:10px 12px;border-radius:11px;background:#f3f6f9;border:1px solid #e7edf3;display:flex;flex-wrap:wrap;gap:5px 14px;color:#7a8796;font-size:11.5px;line-height:1.45}
 .compact-guide strong{color:#475569}
 .paper-section{padding:18px 2px 0}
@@ -116,11 +125,22 @@ button,input,textarea{font:inherit}
 .help-mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.help-mode-card{padding:15px;border:1px solid #e3e9f1;border-radius:15px;background:#fbfcfe}.help-mode-card.is-primary{border-color:#bfdbfe;background:#f6faff}.mode-card-label{display:inline-flex;align-items:center;min-height:22px;margin-bottom:9px;padding:0 8px;border-radius:999px;background:#eef2f7;color:#64748b;font-size:10px;font-weight:900}.is-primary .mode-card-label{background:#dbeafe;color:#1d4ed8}.help-mode-card h4{margin:0;color:#172033;font-size:13.5px;letter-spacing:-.025em}.help-mode-card p{margin:5px 0 0;color:#718096;font-size:11.5px;line-height:1.55;word-break:keep-all}
 .help-chip-list{display:flex;flex-wrap:wrap;gap:7px}.help-chip-list span{display:inline-flex;align-items:center;min-height:31px;padding:0 11px;border:1px solid #dce5f0;border-radius:10px;background:#f8fafc;color:#334155;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif;font-size:12px;font-weight:800}.help-detail{margin:10px 0 0;color:#7a8796;font-size:11.5px;line-height:1.6}
 .help-notice{display:flex;align-items:flex-start;gap:11px;margin-bottom:10px;padding:14px;border:1px solid #dbeafe;border-radius:14px;background:#f8fbff}.notice-icon{width:25px;height:25px;display:grid;place-items:center;flex:0 0 auto;border-radius:8px;background:#2563eb;color:#fff;font-size:12px;font-weight:950}.help-notice strong{display:block;color:#1e3a8a;font-size:12.5px}.help-notice p{margin:4px 0 0;color:#64748b;font-size:11.5px;line-height:1.55}
+.update-history{margin:10px 0 0;border:1px solid #e2e8f0;border-radius:14px;background:#fff;overflow:hidden}
+.update-history summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;cursor:pointer;color:#475569;font-size:11.8px;font-weight:850;list-style:none}
+.update-history summary::-webkit-details-marker{display:none}
+.update-history summary::after{content:'+';color:#94a3b8;font-size:16px;font-weight:700;line-height:1}
+.update-history[open] summary::after{content:'−'}
+.update-history-current{color:#2563eb;font-size:10.8px;font-weight:800}
+.update-history-list{margin:0;padding:0 14px 12px;list-style:none;border-top:1px solid #edf2f7}
+.update-history-list li{display:grid;grid-template-columns:68px minmax(0,1fr);gap:10px;padding:9px 0;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:11px;line-height:1.45}
+.update-history-list li:last-child{border-bottom:0;padding-bottom:0}
+.update-history-list strong{color:#334155;font-size:10.8px}
+
 .privacy-notice{display:flex;align-items:flex-start;gap:9px;margin-bottom:12px;padding:12px 14px;border-radius:13px;background:#f0fdf4;color:#166534}.privacy-notice>span{margin-top:5px;color:#22c55e;font-size:8px}.privacy-notice p{margin:0;font-size:11.5px;line-height:1.55}.privacy-notice strong{font-weight:950}
 .help-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 24px 20px;border-top:1px solid #edf1f6;background:#fff}.help-credit{margin:0;color:#94a3b8;font-size:11.5px;font-weight:650;letter-spacing:-.015em}.help-credit strong{color:#64748b;font-weight:850}.help-confirm-btn{min-width:118px;min-height:42px;padding:0 18px;border-radius:12px;font-size:13px}
 @keyframes helpFadeIn{from{opacity:0}to{opacity:1}}@keyframes helpDialogIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 
-/* v1.13.2 · 핵심 CTA 위치/가시성 개선 */
+/* v1.13.2 · 핵심 CTA 위치/가시성 개선 (이전 변경) */
 /* 입력 직후에 핵심 버튼을 배치하고, 데스크톱에서는 긴 입력 중에도 하단에 유지합니다. */
 
 /* v1.13.1 · 좌우 5:5 정렬 */
@@ -141,7 +161,7 @@ button,input,textarea{font:inherit}
 }
 @media (max-width:720px){
   .sticky-inner{width:min(100% - 20px,1240px);min-height:60px;padding:7px 0;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px}.sticky-brand-block{gap:3px}.sticky-title-row{gap:7px}.sticky-app-icon{font-size:18px}.sticky-app-name{font-size:20px}.sticky-version{font-size:11.5px}.sticky-subtitle{font-size:11px;white-space:nowrap}.sticky-actions{width:auto;display:flex;justify-content:flex-end;gap:6px;align-self:center}.header-action-btn{width:auto;min-height:34px;height:34px;padding:0 10px;border-radius:10px;font-size:11.5px}.app{width:min(100% - 20px,1240px);padding-top:10px}
-  .title-inline-field{grid-template-columns:42px minmax(0,1fr)}.title-file-hint{grid-column:2/3}
+  .title-inline-field{grid-template-columns:42px minmax(0,1fr) auto}.title-inline-input{grid-column:2/4}.title-file-hint{grid-column:2/3}.title-action-spacer{display:none}.title-reset-btn{grid-column:3;justify-self:end}
   .source-panel,.result-panel{padding:14px;border-radius:17px}
   .source-head{gap:8px}.local-badge{display:none}
   .mode-btn{min-height:44px;font-size:12.5px}
@@ -159,7 +179,7 @@ button,input,textarea{font:inherit}
 }
 @media (max-width:480px){
   .sticky-inner{width:min(100% - 16px,1240px);gap:6px}.sticky-title-row{gap:6px}.sticky-app-icon{font-size:17px}.sticky-app-name{font-size:19px}.sticky-version{font-size:10.5px}.sticky-subtitle{font-size:10px}.sticky-actions{display:flex;gap:5px}.header-action-btn{width:auto;min-height:32px;height:32px;padding:0 8px;font-size:11px}
-  .title-inline-field{grid-template-columns:1fr;gap:6px}.title-file-hint{grid-column:1}.mode-switch,.result-action-switch{grid-template-columns:1fr}.mode-btn,.result-action-btn{justify-content:flex-start;padding-left:14px}
+  .title-inline-field{grid-template-columns:minmax(0,1fr) auto;gap:6px 8px}.title-inline-label{grid-column:1/-1}.title-inline-input{grid-column:1/-1}.title-file-hint{grid-column:1}.title-reset-btn{grid-column:2;justify-self:end}.mode-switch,.result-action-switch{grid-template-columns:1fr}.mode-btn,.result-action-btn{justify-content:flex-start;padding-left:14px}
   .reset-safe-btn{width:100%}
 }
 @media print{
@@ -182,3 +202,355 @@ button,input,textarea{font:inherit}
   .demo-card-title-row{align-items:flex-start;flex-direction:column;gap:5px}.demo-card-badge{min-height:20px}.demo-card-copy p{font-size:11.5px}
 }
 @media print{.demo-card,.demo-result-notice{display:none!important}}
+
+
+/* v1.13.3 · CTA를 입력 전 노출 + 상단 초기화 동선 */
+@media (max-width:900px){
+  .source-head{align-items:flex-start}
+  .source-head-actions{max-width:46%;gap:6px}
+  .source-action-row{align-items:stretch;flex-direction:column;padding:11px}
+  .source-action-copy{align-items:flex-start}
+  .source-primary-btn{width:100%;min-width:0;min-height:50px}
+}
+@media (max-width:560px){
+  .source-head{flex-direction:column}
+  .source-head-actions{width:100%;max-width:none;justify-content:space-between}
+}
+
+/* v1.13.4 · 정리 전/후 비교형 작업화면 + 체험하기 하단 이동 */
+@media (min-width:901px){
+  .workbench{position:relative;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+  .source-panel,.result-panel{position:static;max-height:none;height:auto}
+  .source-head,.result-head{min-height:72px;margin-bottom:12px}
+  .mode-switch,.result-action-switch{min-height:50px;margin-bottom:12px}
+  .source-action-row,.status-line{min-height:62px;margin-bottom:12px}
+  .source-action-row{position:static;padding:7px 8px 7px 11px}
+  .source-primary-btn{min-height:46px}
+  .status-line{justify-content:flex-end;padding:7px 2px}
+  .document-input,.result-sheet,.result,.empty-preview{min-height:520px}
+  .document-input{height:520px;resize:vertical}
+  .result-sheet{height:520px;flex:none;margin-top:0}
+  .result{height:100%}
+  .compare-kicker{color:#2563eb}
+  .input-column,.preview-column{position:relative}
+  .result-panel{padding-top:20px}
+  .result-head{margin-top:-2px}
+  .input-column::after{content:'→';position:absolute;right:-17px;top:248px;z-index:8;width:28px;height:28px;display:grid;place-items:center;border:1px solid #cfe0ff;border-radius:999px;background:#fff;color:#2563eb;font-size:16px;font-weight:950;box-shadow:0 6px 16px rgba(37,99,235,.12);pointer-events:none}
+  .paper-caption{margin-top:10px;margin-bottom:0;min-height:28px}
+  .demo-result-notice{display:none!important}
+}
+
+.cta-arrow{display:inline-block;margin-left:4px;font-size:16px;line-height:1;transition:transform .14s ease}
+.source-primary-btn:hover .cta-arrow{transform:translateX(3px)}
+.demo-card-bottom{margin:20px 0 0;background:#fbfcfe;border-color:#e2e8f0;box-shadow:none}
+.demo-card-bottom:hover{border-color:#d3dce8;box-shadow:0 7px 20px rgba(15,23,42,.045)}
+.demo-card-bottom .demo-card-icon{background:#64748b;box-shadow:none}
+.demo-card-bottom .demo-btn{border-color:#d8e0e9;color:#475569;box-shadow:none}
+.demo-card-bottom .demo-btn:hover{background:#334155;border-color:#334155;color:#fff;box-shadow:0 7px 18px rgba(51,65,85,.14)}
+
+@media (max-width:900px){
+  .input-column::after{display:none}
+  .demo-card-bottom{margin-top:14px}
+}
+
+
+/* v1.13.21 · Figma-style visual refinement (layout values intentionally preserved) */
+:root{
+  --bg:#F7F8FA;
+  --surface:#FFFFFF;
+  --paper:#FFFFFF;
+  --text:#18181B;
+  --sub:#71717A;
+  --line:#E5E7EB;
+  --line-soft:#E9EAEE;
+  --blue:#2563EB;
+  --blue-dark:#1D4ED8;
+  --blue-soft:#EFF6FF;
+  --shadow-soft:0 1px 2px rgba(15,23,42,.025);
+  --paper-shadow:0 4px 16px rgba(15,23,42,.045);
+}
+body{background:var(--bg)}
+.ui-icon{width:16px;height:16px;display:inline-block;flex:0 0 auto;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
+.ui-icon-arrow{width:15px;height:15px}
+.sticky-app-icon{width:30px;height:30px;display:grid;place-items:center;border:1px solid #E5E7EB;border-radius:9px;background:#fff;color:#2563EB;font-size:0}
+.sticky-app-icon .ui-icon{width:17px;height:17px}
+.sticky-app-name{font-weight:780;color:#18181B}
+.sticky-version{font-weight:650;color:#A1A1AA}
+.sticky-subtitle{font-weight:500;color:#71717A}
+.sticky-bar.is-scrolled{box-shadow:0 2px 10px rgba(15,23,42,.035)}
+.header-action-btn{border-radius:10px;border-color:#E5E7EB;color:#3F3F46;font-weight:680;box-shadow:none;transition:background-color .14s ease,border-color .14s ease,color .14s ease}
+.header-action-btn:hover{background:#F4F5F7;border-color:#D4D4D8;color:#18181B;transform:none}
+.panel{border-color:#E5E7EB;border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.025)}
+.title-panel{background:#fff;border-radius:14px;border-color:#E5E7EB}
+.title-inline-label{font-weight:700;color:#3F3F46}
+.title-file-hint{font-weight:550;color:#A1A1AA}
+.input,.textarea{border-color:#E5E7EB;border-radius:10px;background:#fff;transition:border-color .14s ease,box-shadow .14s ease,background-color .14s ease}
+.input:focus,.textarea:focus{border-color:#93C5FD;box-shadow:0 0 0 3px rgba(37,99,235,.10)}
+.source-panel,.result-panel{background:#fff;border-color:#E5E7EB;box-shadow:0 1px 2px rgba(15,23,42,.025)}
+.document-kicker{font-weight:680;color:#71717A;letter-spacing:0}
+.compare-kicker{color:#71717A!important}
+.source-head h2,.result-head h2{font-weight:740;color:#18181B}
+.source-head p,.result-head p{font-weight:450;color:#71717A}
+.local-badge{border-color:#BBF7D0;background:#F0FDF4;color:#15803D;font-weight:680}
+.source-reset-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-color:#E5E7EB;color:#71717A;font-weight:680;box-shadow:none;transition:background-color .14s ease,border-color .14s ease,color .14s ease}
+.source-reset-btn:hover{border-color:#FECACA;background:#FFF7F7;color:#B91C1C}
+.source-reset-btn.is-demo-exit{border-color:#DBEAFE;background:#EFF6FF;color:#1D4ED8}
+.mode-switch,.result-action-switch{border-color:#E5E7EB;border-radius:12px;background:#F4F5F7;box-shadow:none}
+.mode-btn,.result-action-btn{border-radius:9px;font-weight:680;color:#71717A;box-shadow:none;transition:background-color .14s ease,color .14s ease,box-shadow .14s ease}
+.mode-btn:hover{background:rgba(255,255,255,.7);color:#3F3F46}
+.mode-btn.is-active{background:#fff;color:#2563EB;box-shadow:0 1px 2px rgba(15,23,42,.06)}
+.result-action-btn{background:#fff;color:#3F3F46;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.result-action-btn:hover{background:#FAFAFA;color:#1D4ED8;box-shadow:0 1px 2px rgba(15,23,42,.055)}
+.source-action-row{border-color:#E5E7EB;border-radius:12px;background:#F8FAFC;box-shadow:none;backdrop-filter:none}
+.source-action-step{border-radius:999px;background:#EFF6FF;color:#2563EB;font-weight:700;box-shadow:none}
+.source-action-help{color:#52525B;font-weight:520}
+.soft-btn,.primary-btn,.secondary-btn,.reset-btn{border-radius:10px;font-weight:680}
+.primary-btn{box-shadow:none;transition:background-color .14s ease,border-color .14s ease,color .14s ease}
+.primary-btn:hover{background:#1D4ED8;transform:none}
+.source-primary-btn{border-radius:10px;font-weight:700;box-shadow:0 2px 5px rgba(37,99,235,.16);display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.source-primary-btn:hover{box-shadow:0 2px 5px rgba(37,99,235,.16)}
+.source-primary-btn:hover .ui-icon-arrow{transform:none}
+.cta-arrow{display:none}
+.compact-guide{background:#F7F7F8;border-color:#ECEDEF;border-radius:10px;color:#71717A}
+.paper-caption strong{font-weight:680;color:#52525B}
+.paper-caption span{font-weight:500;color:#A1A1AA}
+.document-input,.document-sheet{border-color:#E5E7EB;border-radius:8px;box-shadow:0 4px 16px rgba(15,23,42,.045)}
+.result:focus{box-shadow:inset 0 0 0 2px rgba(37,99,235,.12)}
+.status{font-weight:550;color:#71717A;border-color:#E5E7EB;background:#FAFAFA}
+.status.is-success{color:#15803D;background:#F0FDF4;border-color:#BBF7D0}
+.empty-preview-icon{width:38px;height:38px;display:grid;place-items:center;border:1px solid #E5E7EB;border-radius:10px;background:#FAFAFA;color:#A1A1AA;font-size:0;opacity:1}
+.empty-preview-icon .ui-icon{width:19px;height:19px}
+.empty-preview-title{font-weight:650;color:#71717A}
+.result-edit-note{display:flex;align-items:flex-start;gap:6px;color:#A1A1AA;font-weight:450}
+.result-edit-note .ui-icon{width:14px;height:14px;margin-top:1px}
+.demo-card-bottom{background:#fff;border-color:#E5E7EB;border-radius:14px;box-shadow:none}
+.demo-card-bottom:hover{border-color:#D4D4D8;box-shadow:none}
+.demo-card-bottom .demo-card-icon{width:38px;height:38px;border:1px solid #E5E7EB;border-radius:10px;background:#F4F5F7;color:#71717A;box-shadow:none}
+.demo-card-icon .ui-icon{width:17px;height:17px}
+.demo-card-title-row strong{font-weight:680;color:#27272A}
+.demo-card-badge{font-weight:650;border-color:#E5E7EB;background:#FAFAFA;color:#71717A}
+.demo-card-copy p{font-weight:450;color:#71717A}
+.demo-card-bottom .demo-btn{display:inline-flex;align-items:center;gap:7px;border-color:#E5E7EB;border-radius:10px;color:#52525B;font-weight:680;box-shadow:none;background:#fff}
+.demo-card-bottom .demo-btn:hover{background:#F4F5F7;border-color:#D4D4D8;color:#27272A;box-shadow:none;transform:none}
+.demo-btn-arrow{display:none}
+.demo-result-mark{border-radius:8px;background:#EFF6FF;color:#2563EB;box-shadow:none}
+.demo-result-mark .ui-icon{width:15px;height:15px}
+.demo-exit-btn{display:inline-flex;align-items:center;gap:6px;font-weight:650}
+.help-dialog{border-color:#E5E7EB;border-radius:18px;box-shadow:0 24px 70px rgba(15,23,42,.18)}
+.help-app-mark{border-radius:10px;box-shadow:none;font-weight:750}
+.help-close-btn{border-radius:10px;box-shadow:none}
+.help-section-number,.step-number{font-weight:700}
+.help-mode-card,.quick-steps li{box-shadow:none}
+.help-confirm-btn{box-shadow:none;font-weight:680}
+.update-history-current{font-weight:650}
+.floating-top-btn{border-radius:10px;box-shadow:0 5px 18px rgba(15,23,42,.08);font-weight:700}
+.toast{font-weight:650;box-shadow:0 10px 30px rgba(15,23,42,.16)}
+
+
+/* v1.13.22 · 공문핏 디자인 시스템 재정렬 — 정돈된 귀여움 */
+:root{
+  --control-height:46px;
+  --control-radius:10px;
+  --panel-head-height:72px;
+  --utility-row-height:62px;
+  --ui-gap:12px;
+}
+
+/* 제목은 문서 제목과 같은 체급 */
+.title-inline-label{
+  font-size:19px;
+  line-height:1.25;
+  font-weight:740;
+  letter-spacing:-.045em;
+  color:#18181B;
+}
+
+/* 이모지 아이콘 — 귀여움은 유지하되 크기와 자리 폭은 통일 */
+.sticky-app-icon{
+  width:auto;
+  height:auto;
+  display:inline-block;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:inherit;
+  font-size:20px;
+  line-height:1;
+}
+.control-emoji{
+  width:18px;
+  height:18px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 18px;
+  font-size:15px;
+  line-height:1;
+}
+
+/* 좌우 4개 기능 버튼의 규격을 완전히 동일하게 */
+.mode-switch,.result-action-switch{
+  min-height:54px;
+  padding:4px;
+  gap:5px;
+  border-radius:12px;
+}
+.mode-btn,.result-action-btn{
+  height:var(--control-height);
+  min-height:var(--control-height);
+  padding:0 14px;
+  border-radius:var(--control-radius);
+  gap:7px;
+  font-size:13.5px;
+  line-height:1;
+  font-weight:700;
+  letter-spacing:-.02em;
+}
+.mode-btn.is-active{
+  color:#1D4ED8;
+}
+.result-action-btn{
+  color:#3F3F46;
+}
+
+/* 헤더와 작업행을 공통 리듬으로 */
+.source-head,.result-head{
+  min-height:var(--panel-head-height);
+}
+.source-action-row,.status-line{
+  min-height:var(--utility-row-height);
+}
+
+/* 화면에 1번이 없으므로 2번 step은 사용하지 않음 */
+.source-action-step{display:none!important}
+.source-action-copy{gap:0}
+.source-action-help{
+  margin:0;
+  font-size:13px;
+  line-height:1.45;
+  font-weight:520;
+  color:#52525B;
+}
+.source-action-row{
+  padding:7px 8px 7px 14px;
+  border-color:#E4E7EC;
+  background:#F8FAFC;
+}
+.source-primary-btn{
+  height:var(--control-height);
+  min-height:var(--control-height);
+  padding:0 18px;
+  border-radius:var(--control-radius);
+  gap:7px;
+  font-size:13.5px;
+  line-height:1;
+  font-weight:700;
+  box-shadow:0 2px 5px rgba(37,99,235,.14);
+}
+.cta-arrow{
+  display:inline-block;
+  margin-left:1px;
+  font-size:15px;
+  line-height:1;
+  transition:none;
+}
+.source-primary-btn:hover .cta-arrow{transform:none}
+
+/* 보조 버튼은 작고 조용하게 */
+.title-reset-btn,.source-reset-btn,.demo-exit-btn{
+  min-height:34px;
+  font-weight:650;
+}
+
+/* 이모지 복귀에 맞춘 빈 상태/체험 요소 */
+.empty-preview-icon{
+  width:auto;
+  height:auto;
+  display:block;
+  border:0;
+  background:transparent;
+  color:inherit;
+  font-size:32px;
+  line-height:1;
+  opacity:.72;
+}
+.demo-card-bottom .demo-card-icon{
+  width:38px;
+  height:38px;
+  display:grid;
+  place-items:center;
+  border:1px solid #E5E7EB;
+  border-radius:10px;
+  background:#F7F7F8;
+  color:#52525B;
+  font-size:14px;
+}
+.demo-result-mark{
+  font-size:12px;
+  line-height:1;
+}
+.result-edit-note>span:first-child{
+  flex:0 0 auto;
+  font-size:13px;
+  line-height:1.3;
+}
+.demo-card-bottom .demo-btn{
+  min-height:42px;
+  gap:7px;
+}
+.demo-btn-arrow{display:inline-block}
+
+@media (max-width:900px){
+  .title-inline-label{font-size:17px}
+  .mode-btn,.result-action-btn{height:44px;min-height:44px;font-size:13px}
+  .source-primary-btn{height:46px;min-height:46px}
+}
+
+
+/* v1.13.23 · 블루 컬러 밸런스 + 제목 가용폭 확장 */
+@media (min-width:901px){
+  /* 고정 850px 대신 남는 공간을 제목 입력칸이 최대한 사용 */
+  .title-inline-field{
+    grid-template-columns:auto minmax(0,1fr) auto auto;
+    gap:10px;
+  }
+  .title-action-spacer{display:none}
+
+  /* Before는 neutral, After는 아주 옅은 blue tint */
+  .result-panel{
+    background:#F8FBFF;
+    border-color:#DCE8FA;
+  }
+  .source-panel{
+    background:#FFFFFF;
+  }
+
+  /* CTA 안내행은 soft blue, 실제 CTA만 진한 blue */
+  .source-action-row{
+    background:#F5F8FF;
+    border-color:#D8E5FA;
+  }
+}
+
+/* 선택 상태는 한 단계 더 명확한 soft blue */
+.mode-btn.is-active{
+  background:#EEF4FF;
+  color:#1D4ED8;
+  box-shadow:inset 0 0 0 1px #D7E5FF,0 1px 2px rgba(15,23,42,.035);
+}
+
+/* 정리 전/후 라벨은 과하지 않은 회청색 */
+.compare-kicker{
+  color:#647FAE!important;
+}
+
+/* 결과 액션은 중립 유지 — CTA와 경쟁하지 않음 */
+.result-action-btn{
+  background:#FFFFFF;
+  color:#3F3F46;
+}
+
+/* 결과 sheet는 tint 안에서 흰 종이로 또렷하게 */
+.result-panel .document-sheet{
+  background:#FFFFFF;
+}
