@@ -702,6 +702,7 @@ function updateSourceResetButton() {
 
 function setDemoMode(active) {
   isDemoMode = Boolean(active);
+  if (pasteInput) pasteInput.classList.toggle('is-sample-text', isDemoMode);
   if (demoNotice) demoNotice.hidden = !isDemoMode;
   if (demoCard) demoCard.classList.toggle('is-active', isDemoMode);
   if (demoBtnLabel) demoBtnLabel.textContent = isDemoMode ? '체험 다시보기' : '공문핏 체험하기';
@@ -864,6 +865,11 @@ document.getElementById('addAttachBtn').addEventListener('click', () => addAttac
 generateBtn.addEventListener('click', generateActiveMode);
 document.getElementById('copyBtn').addEventListener('click', copyResult);
 document.getElementById('downloadBtn').addEventListener('click', downloadTxt);
+if (pasteInput) {
+  pasteInput.addEventListener('input', () => {
+    if (isDemoMode) setDemoMode(false);
+  });
+}
 document.getElementById('mainSentence').addEventListener('input', e => autoResize(e.target));
 if (addBodyItemBtn) addBodyItemBtn.addEventListener('click', addBodyItem);
 if (composeModeBtn) composeModeBtn.addEventListener('click', () => { setDemoMode(false); switchMode('compose'); });

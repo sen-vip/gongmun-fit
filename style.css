@@ -601,3 +601,19 @@ body{background:var(--bg)}
   .header-action-btn{min-height:32px;height:32px;padding:0 7px;border-radius:8px;font-size:11.5px}
   .header-link-arrow{font-size:11px}
 }
+
+
+/* v1.13.25 · 예시/체험 텍스트 위계 강화 */
+.document-input::placeholder{
+  color:#8B95A5;
+  opacity:1;
+}
+.document-input{
+  color:#334155;
+}
+.document-input.is-sample-text{
+  color:#6B7280;
+}
+.document-input.is-sample-text:focus{
+  color:#6B7280;
+}
