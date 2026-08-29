@@ -554,3 +554,50 @@ body{background:var(--bg)}
 .result-panel .document-sheet{
   background:#FFFFFF;
 }
+
+
+/* v1.13.24 · 상단바 액션 경량화 */
+.sticky-actions{
+  gap:4px;
+}
+.header-action-btn{
+  min-height:34px;
+  height:34px;
+  padding:0 9px;
+  border:1px solid transparent;
+  border-radius:8px;
+  background:transparent;
+  color:#52525B;
+  font-size:12.5px;
+  font-weight:650;
+  line-height:1;
+  box-shadow:none;
+  transform:none;
+  transition:background-color .14s ease,color .14s ease;
+}
+.header-action-btn:hover{
+  background:#F4F6F8;
+  border-color:transparent;
+  color:#18181B;
+  transform:none;
+  box-shadow:none;
+}
+.header-action-btn:focus-visible{
+  outline:3px solid rgba(37,99,235,.12);
+  outline-offset:1px;
+}
+.header-link-arrow{
+  margin-left:2px;
+  color:#A1A1AA;
+  font-size:12px;
+  font-weight:700;
+  line-height:1;
+}
+.header-action-btn:hover .header-link-arrow{
+  color:#64748B;
+}
+@media (max-width:900px){
+  .sticky-actions{gap:2px}
+  .header-action-btn{min-height:32px;height:32px;padding:0 7px;border-radius:8px;font-size:11.5px}
+  .header-link-arrow{font-size:11px}
+}
