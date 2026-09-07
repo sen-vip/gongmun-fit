@@ -397,6 +397,15 @@ function getResultText() {
   return typeof resultPreview.value === 'string' ? resultPreview.value : resultPreview.textContent || '';
 }
 
+function removeTrailingSpacesFromLines(text) {
+  return String(text || '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .split('\n')
+    .map(line => line.replace(/[ \t\f\v\u00A0\u2000-\u200B\u202F\u205F\u3000]+$/g, ''))
+    .join('\n');
+}
+
 function setResultText(text) {
   if (!resultPreview) return;
   if (typeof resultPreview.value === 'string') resultPreview.value = text;
@@ -418,7 +427,7 @@ function setEmptyPreview(title = '아직 결과가 없어요', description = '�
 
 function showResultPreview(text) {
   hasGeneratedResult = true;
-  setResultText(text);
+  setResultText(removeTrailingSpacesFromLines(text));
   if (resultPanel) resultPanel.classList.remove('is-empty');
 }
 
@@ -786,10 +795,12 @@ function switchMode(mode) {
 
 async function copyResult() {
   const currentResult = getResultText();
-  const text = hasGeneratedResult && currentResult.trim()
+  const rawText = hasGeneratedResult && currentResult.trim()
     ? currentResult
     : generateActiveMode();
+  const text = removeTrailingSpacesFromLines(rawText);
   if (!text || !text.trim()) return;
+  setResultText(text);
 
   try {
     await navigator.clipboard.writeText(text);
@@ -803,10 +814,12 @@ async function copyResult() {
 
 function downloadTxt() {
   const currentResult = getResultText();
-  const text = hasGeneratedResult && currentResult.trim()
+  const rawText = hasGeneratedResult && currentResult.trim()
     ? currentResult
     : generateActiveMode();
+  const text = removeTrailingSpacesFromLines(rawText);
   if (!text || !text.trim()) return;
+  setResultText(text);
 
   const title = normalizeText(document.getElementById('docTitle').value) || '2000학년도 OO 실시';
   const safeTitle = title.replace(/[\\/:*?"<>|]/g, '_');
