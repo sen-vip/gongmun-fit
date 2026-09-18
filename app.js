@@ -48,6 +48,7 @@ const DEMO_TEXT = `1. 관련: 교육과-1234(2026. 8. 10.)
 붙임 1. 교직원 안전교육 계획(안) 1부.
     22. 교육자료 1부.`;
 
+const DEFAULT_TITLE = '2000년 OO 실시';
 const DEFAULT_MAIN_SENTENCE = '2000학년도 OO을 다음과 같이 OO하고자 합니다.';
 const RELATED_SAMPLE = 'OO과-0000(2020. 00. 00.)';
 const ATTACH_SAMPLE_VALUES = ['계획(안)', '견적서'];
@@ -73,6 +74,20 @@ let relatedCount = 0;
 let attachCount = 0;
 let visibleBodyCount = bodyDefaults.length;
 
+function bindSampleValueStyle(el, sampleValue) {
+  if (!el || !sampleValue) return;
+  el.dataset.sampleValue = sampleValue;
+  const update = () => {
+    const sample = el.dataset.sampleValue || '';
+    el.classList.toggle('is-sample-value', normalizeText(el.value) === normalizeText(sample));
+  };
+  if (el.dataset.sampleStyleBound !== 'true') {
+    el.dataset.sampleStyleBound = 'true';
+    el.addEventListener('input', update);
+  }
+  update();
+}
+
 function createRelatedBox(index, value = RELATED_SAMPLE) {
   const input = document.createElement('input');
   input.className = 'input';
@@ -80,6 +95,7 @@ function createRelatedBox(index, value = RELATED_SAMPLE) {
   input.dataset.type = 'related';
   input.placeholder = `관련 ${index}`;
   input.value = value;
+  bindSampleValueStyle(input, value);
   relatedList.appendChild(input);
 }
 
@@ -97,6 +113,7 @@ function createAttachBox(index, value = '') {
   textarea.placeholder = index === 1 ? '계획(안)' : index === 2 ? '견적서' : '붙임명 입력';
   textarea.rows = 1;
   textarea.value = value;
+  bindSampleValueStyle(textarea, value);
   textarea.addEventListener('input', () => autoResize(textarea));
 
   row.appendChild(marker);
@@ -158,6 +175,7 @@ function createBodyItem(index) {
   textarea.dataset.type = 'body';
   textarea.dataset.label = config.label || '';
   textarea.value = config.value || '';
+  bindSampleValueStyle(textarea, config.value || '');
   textarea.placeholder = config.custom ? '내용을 입력하세요' : config.label;
   textarea.rows = 1;
   textarea.addEventListener('input', () => {
@@ -558,6 +576,78 @@ function escapeRegExp(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function promoteSingleTopLevelBodyHierarchy(raw) {
+  const source = String(raw || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const lines = source.split('\n');
+  const markerPattern = itemMarkers.map(escapeRegExp).join('|');
+  const koreanDotPattern = new RegExp(`^(\\s*)(${markerPattern})\\s*[.．](?:\\s+|$|(?=[가-힣A-Za-z0-9]))`);
+  const koreanParenPattern = new RegExp(`^(\\s*)(${markerPattern})\\s*[)](?:\\s+|$|(?=[가-힣A-Za-z0-9]))`);
+  const numberDotPattern = /^(\s*)(\d{1,2})\s*[.．](?:\s+|$|(?=[가-힣A-Za-z]))/;
+  const numberParenPattern = /^(\s*)(\d{1,2})\s*[)](?:\s+|$|(?=[가-힣A-Za-z]))/;
+  const attachmentBoundaryPattern = /^\s*붙임(?:\s|$)/;
+
+  const attachmentIndex = lines.findIndex(line => attachmentBoundaryPattern.test(line));
+  const bodyEnd = attachmentIndex >= 0 ? attachmentIndex : lines.length;
+  const topLevelItems = [];
+
+  for (let i = 0; i < bodyEnd; i += 1) {
+    const line = lines[i];
+    const isShortDateLine = /^\s*\d{1,2}\s*[.．]\s*\d{1,2}\s*[.．]/.test(line);
+    if (isShortDateLine) continue;
+    const match = line.match(numberDotPattern);
+    if (match) {
+      topLevelItems.push({ index: i, number: Number(match[2]), match });
+    }
+  }
+
+  // 실제 최상위 숫자 항목이 정확히 `1.` 하나일 때만 계층 승격을 검토한다.
+  if (topLevelItems.length !== 1 || topLevelItems[0].number !== 1) {
+    return { text: source, promoted: false };
+  }
+
+  const root = topLevelItems[0];
+  const koreanDotChildren = [];
+  for (let i = root.index + 1; i < bodyEnd; i += 1) {
+    if (koreanDotPattern.test(lines[i])) koreanDotChildren.push(i);
+  }
+
+  // 하위 병렬 항목이 둘 이상일 때만 단일 본문 규칙을 적용해 오탐을 줄인다.
+  if (koreanDotChildren.length < 2) {
+    return { text: source, promoted: false };
+  }
+
+  const promotedLines = lines.slice();
+  promotedLines[root.index] = lines[root.index].slice(root.match[0].length);
+
+  let promotedMainNumber = 1;
+  for (let i = root.index + 1; i < bodyEnd; i += 1) {
+    const line = lines[i];
+
+    const koreanDotItem = line.match(koreanDotPattern);
+    if (koreanDotItem) {
+      const content = line.slice(koreanDotItem[0].length);
+      promotedLines[i] = `${promotedMainNumber}. ${content}`;
+      promotedMainNumber += 1;
+      continue;
+    }
+
+    const subNumberItem = line.match(numberParenPattern);
+    if (subNumberItem) {
+      const content = line.slice(subNumberItem[0].length);
+      promotedLines[i] = `  가. ${content}`;
+      continue;
+    }
+
+    const koreanParenItem = line.match(koreanParenPattern);
+    if (koreanParenItem) {
+      const content = line.slice(koreanParenItem[0].length);
+      promotedLines[i] = `    1) ${content}`;
+    }
+  }
+
+  return { text: promotedLines.join('\n'), promoted: true };
+}
+
 function renumberPastedText() {
   const raw = String(pasteInput?.value || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   if (!raw.trim()) {
@@ -567,6 +657,9 @@ function renumberPastedText() {
     pasteInput?.focus();
     return '';
   }
+
+  const hierarchyPromotion = promoteSingleTopLevelBodyHierarchy(raw);
+  const sourceText = hierarchyPromotion.text;
 
   const markerPattern = itemMarkers.map(escapeRegExp).join('|');
   // 공문 항목 체계의 넷째 단계까지 구분한다: 1. → 가. → 1) → 가)
@@ -590,7 +683,7 @@ function renumberPastedText() {
   let koreanParenCount = 0;
   let attachmentCount = 0;
 
-  const resultLines = raw.split('\n').map(line => {
+  const resultLines = sourceText.split('\n').map(line => {
     // '8. 20.'처럼 월·일로 시작하는 날짜형 줄은 본문 숫자 순번으로 처리하지 않는다.
     const isShortDateLine = /^\s*\d{1,2}\s*[.．]\s*\d{1,2}\s*[.．]/.test(line);
 
@@ -677,13 +770,14 @@ function renumberPastedText() {
 
   if (totalCount > 0) {
     const parts = [];
+    if (hierarchyPromotion.promoted) parts.push('단일 본문 계층 정리');
     if (bodyNumberCount) parts.push(`본문 숫자 ${bodyNumberCount}`);
     if (koreanDotCount) parts.push(`가나다 ${koreanDotCount}`);
     if (subNumberCount) parts.push(`1) 순번 ${subNumberCount}`);
     if (koreanParenCount) parts.push(`가) 순번 ${koreanParenCount}`);
     if (attachmentCount) parts.push(`붙임 ${attachmentCount}`);
     setStatus(`✓ 순번 정리 완료 · ${parts.join(' · ')}`, 'success');
-    showToast(`✓ 순번 ${totalCount}개를 정리했어요`, 'success');
+    showToast(hierarchyPromotion.promoted ? '✓ 단일 본문 계층과 순번을 정리했어요' : `✓ 순번 ${totalCount}개를 정리했어요`, 'success');
   } else {
     setStatus('정리할 순번 없음');
     showToast('정리할 1. / 가. / 1) / 가) 항목이 없어요', 'success');
@@ -728,7 +822,7 @@ function setDemoMode(active) {
 
 function startDemo() {
   if (activeMode !== 'paste') switchMode('paste');
-  if (docTitle) docTitle.value = DEMO_TITLE;
+  if (docTitle) { docTitle.value = DEMO_TITLE; bindSampleValueStyle(docTitle, DEMO_TITLE); }
   if (pasteInput) pasteInput.value = DEMO_TEXT;
   setDemoMode(true);
   renumberPastedText();
@@ -743,7 +837,7 @@ function startDemo() {
 function exitDemo() {
   setDemoMode(false);
   if (activeMode !== 'paste') switchMode('paste');
-  if (docTitle) docTitle.value = '2000학년도 OO 실시';
+  if (docTitle) { docTitle.value = DEFAULT_TITLE; bindSampleValueStyle(docTitle, DEFAULT_TITLE); }
   if (pasteInput) pasteInput.value = '';
   setEmptyPreview('이제 내 공문을 작성해보세요', '공문을 붙여넣고 순번 정리하기를 눌러보세요');
   setStatus('작성 준비');
@@ -821,7 +915,7 @@ function downloadTxt() {
   if (!text || !text.trim()) return;
   setResultText(text);
 
-  const title = normalizeText(document.getElementById('docTitle').value) || '2000학년도 OO 실시';
+  const title = normalizeText(document.getElementById('docTitle').value) || DEFAULT_TITLE;
   const safeTitle = title.replace(/[\\/:*?"<>|]/g, '_');
   const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
@@ -841,8 +935,10 @@ function resetForm() {
   if (!ok) return;
   setDemoMode(false);
 
-  document.getElementById('docTitle').value = '2000학년도 OO 실시';
+  document.getElementById('docTitle').value = DEFAULT_TITLE;
+  bindSampleValueStyle(document.getElementById('docTitle'), DEFAULT_TITLE);
   document.getElementById('mainSentence').value = DEFAULT_MAIN_SENTENCE;
+  bindSampleValueStyle(document.getElementById('mainSentence'), DEFAULT_MAIN_SENTENCE);
   if (pasteInput) pasteInput.value = '';
 
   relatedList.innerHTML = '';
@@ -905,6 +1001,8 @@ if (resultPreview) {
   });
 }
 
+bindSampleValueStyle(docTitle, DEFAULT_TITLE);
+bindSampleValueStyle(document.getElementById('mainSentence'), DEFAULT_MAIN_SENTENCE);
 addRelated(1);
 addAttach(2);
 renderBodyItems();

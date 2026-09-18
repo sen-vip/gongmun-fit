@@ -603,17 +603,34 @@ body{background:var(--bg)}
 }
 
 
-/* v1.13.25 · 예시/체험 텍스트 위계 강화 */
+/* v1.13.28 · 예시/체험 텍스트 위계 강화 */
+.input::placeholder,
+.textarea::placeholder,
 .document-input::placeholder{
-  color:#8B95A5;
+  color:#AAB1BC;
   opacity:1;
 }
 .document-input{
   color:#334155;
 }
+.is-sample-value{
+  color:#98A2B3 !important;
+}
+.is-sample-value:focus{
+  color:#98A2B3 !important;
+}
 .document-input.is-sample-text{
-  color:#6B7280;
+  color:#8791A1;
 }
 .document-input.is-sample-text:focus{
-  color:#6B7280;
+  color:#8791A1;
+}
+.help-reference{
+  margin:10px 0 0;
+  padding:10px 12px;
+  border-radius:10px;
+  background:#F8FAFC;
+  color:#7C8798;
+  font-size:12px;
+  line-height:1.6;
 }

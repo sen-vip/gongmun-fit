@@ -14,7 +14,7 @@
         <div class="sticky-title-row">
           <span class="sticky-app-icon" aria-hidden="true">📝</span>
           <strong class="sticky-app-name">공문핏</strong>
-          <span class="sticky-version">v1.13.26</span>
+          <span class="sticky-version">v1.13.28</span>
         </div>
         <p class="sticky-subtitle">공문 순번 정리 도구 · 외부 전송 없음</p>
       </div>
@@ -29,7 +29,7 @@
     <section class="panel title-panel" aria-label="저장 파일명 설정">
       <div class="title-inline-field">
         <label for="docTitle" class="title-inline-label">제목</label>
-        <input id="docTitle" class="input title-inline-input" type="text" value="2000학년도 OO 실시" placeholder="예: 2026학년도 체험학습 실시" />
+        <input id="docTitle" class="input title-inline-input" type="text" value="2000년 OO 실시" placeholder="예: 2026년 체험학습 실시" />
         <span class="title-file-hint">TXT 저장 파일명</span>
         <span class="title-action-spacer" aria-hidden="true"></span>
         <button id="sourceResetBtn" class="source-reset-btn title-reset-btn" type="button">↺ 입력 비우기</button>
@@ -248,7 +248,8 @@
             <span>붙임 1. 2. 3.</span>
             <span>.&nbsp;&nbsp;끝.</span>
           </div>
-          <p class="help-detail">통째로 붙여넣으면 1. / 가. / 1) / 가) 앞을 각각 0·2·4·6칸으로 통일합니다. 붙임이 1개면 번호 없이 ‘붙임’ 뒤 2칸에 문서명을 쓰고, 2개 이상이면 첫 번호는 ‘붙임’ 뒤 2칸, 2번부터는 숫자 앞을 6칸으로 맞춥니다. 날짜·일반 문장·빈 줄은 가능한 한 그대로 유지하며, 붙임명만 입력한 경우 ‘1부.’를 자동으로 붙입니다.</p>
+          <p class="help-detail">통째로 붙여넣으면 1. / 가. / 1) / 가) 앞을 각각 0·2·4·6칸으로 통일합니다. 최상위 본문 항목이 1개뿐이고 그 아래에 가나다 항목이 이어지면 불필요한 1.을 제거하고 하위 번호를 한 단계 올립니다. 붙임이 1개면 번호 없이 ‘붙임’ 뒤 2칸에 문서명을 쓰고, 2개 이상이면 첫 번호는 ‘붙임’ 뒤 2칸, 2번부터는 숫자 앞을 6칸으로 맞춥니다. 날짜·일반 문장·빈 줄은 가능한 한 그대로 유지하며, 붙임명만 입력한 경우 ‘1부.’를 자동으로 붙입니다.</p>
+          <p class="help-reference">행정안전부 「행정업무 운영 편람」 및 「행정업무의 운영 및 혁신에 관한 규정 시행규칙」을 참고합니다.</p>
         </section>
 
         <aside class="help-notice">
@@ -264,9 +265,11 @@
         <details class="update-history">
           <summary>
             <span>업데이트 기록</span>
-            <span class="update-history-current">현재 v1.13.26</span>
+            <span class="update-history-current">현재 v1.13.28</span>
           </summary>
           <ul class="update-history-list">
+            <li><strong>v1.13.28</strong><span>도움말에 공문 작성 참고 기준을 추가하고, 제목 기본 예시를 ‘2000년 OO 실시’로 수정했습니다. 입력 전 예시 문구는 실제 입력보다 더 옅은 회색으로 표시되도록 위계를 강화했습니다.</span></li>
+            <li><strong>v1.13.27</strong><span>최상위 본문 항목이 1개뿐이고 아래에 가나다 하위 항목이 이어지는 경우, 불필요한 1.을 제거하고 하위 번호 체계를 한 단계 올려 정리합니다.</span></li>
             <li><strong>v1.13.26</strong><span>정리·생성·복사·TXT 저장 시 각 줄 끝에 남는 불필요한 공백을 자동으로 제거하도록 개선했습니다.</span></li>
             <li><strong>v1.13.25</strong><span>입력 전 예시와 체험용 원문을 한 단계 더 회색으로 낮추고, 사용자가 직접 입력하면 진한 본문색으로 전환되도록 위계를 정리했습니다.</span></li>
             <li><strong>v1.13.24</strong><span>상단바의 도움말·GitHub를 가벼운 ghost/text 액션으로 정리했습니다.</span></li>
